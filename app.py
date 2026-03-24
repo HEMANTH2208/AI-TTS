@@ -362,7 +362,7 @@ def synthesize():
     data = request.get_json()
 
     text = data.get("text", "").strip()
-    voice_key = data.get("voice", "arthur_us")
+    voice_key = data.get("voice", "voice_neutral")
     slow = data.get("slow", False)
 
     if not text:
@@ -370,12 +370,11 @@ def synthesize():
     if len(text) > 3000:
         return jsonify({"error": "Text too long (max 3000 characters)"}), 400
 
-    # Check if this is a custom trained voice
+    # Check if this is a custom trained voice (check models database first)
     models = load_voice_models()
-    is_custom_voice = voice_key.startswith("voice_")
     
-    if is_custom_voice and voice_key in models:
-        # Use custom voice model
+    if voice_key in models:
+        # Use custom trained voice model
         model = models[voice_key]
         print(f"Using custom voice: {model['name']} (ID: {voice_key})")
         
@@ -426,16 +425,15 @@ def synthesize():
             import traceback
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
-    else:
-        # Use standard gTTS voice
-        voice = VOICES.get(voice_key, VOICES["arthur_us"])
+    elif voice_key in VOICES:
+        # Use standard voice with transformations
+        voice = VOICES[voice_key]
         print(f"Using standard voice: {voice['name']}")
         
         try:
-            tts = gTTS(text=text, lang=voice["lang"], tld=voice["tld"], slow=slow)
-            filename = f"{uuid.uuid4().hex}.mp3"
-            filepath = os.path.join(AUDIO_DIR, filename)
-            tts.save(filepath)
+            # Use the generate_voice_with_characteristics function for proper transformations
+            filename = generate_voice_with_characteristics(text, voice, slow)
+            
             return jsonify({
                 "success": True,
                 "audio_url": f"/static/audio/{filename}",
@@ -445,7 +443,11 @@ def synthesize():
             })
         except Exception as e:
             print(f"Error generating standard voice: {e}")
+            import traceback
+            traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+    else:
+        return jsonify({"error": f"Voice '{voice_key}' not found"}), 404
 
 
 @app.route("/api/synthesize-chunk", methods=["POST"])
@@ -453,18 +455,17 @@ def synthesize_chunk():
     cleanup_old_files()
     data = request.get_json() or {}
     text = (data.get("text") or "").strip()
-    voice_key = data.get("voice", "arthur_us")
+    voice_key = data.get("voice", "voice_neutral")
     slow = data.get("slow", False)
 
     if not text:
         return jsonify({"error": "No text provided"}), 400
 
-    # Check if this is a custom trained voice
+    # Check if this is a custom trained voice (check models database first)
     models = load_voice_models()
-    is_custom_voice = voice_key.startswith("voice_")
     
-    if is_custom_voice and voice_key in models:
-        # Use custom voice model
+    if voice_key in models:
+        # Use custom trained voice model
         model = models[voice_key]
         print(f"Generating chunk with custom voice: {model['name']}")
         
@@ -504,14 +505,15 @@ def synthesize_chunk():
             import traceback
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
-    else:
-        # Use standard gTTS voice
-        voice = VOICES.get(voice_key, VOICES["arthur_us"])
+    elif voice_key in VOICES:
+        # Use standard voice with transformations
+        voice = VOICES[voice_key]
+        print(f"Generating chunk with standard voice: {voice['name']}")
+        
         try:
-            filename = f"{uuid.uuid4().hex}.mp3"
-            filepath = os.path.join(AUDIO_DIR, filename)
-            tts = gTTS(text=text, lang=voice["lang"], tld=voice["tld"], slow=slow)
-            tts.save(filepath)
+            # Use the generate_voice_with_characteristics function for proper transformations
+            filename = generate_voice_with_characteristics(text, voice, slow)
+            
             return jsonify({
                 "success": True,
                 "audio_url": f"/static/audio/{filename}",
@@ -520,7 +522,11 @@ def synthesize_chunk():
             })
         except Exception as e:
             print(f"Error generating standard voice chunk: {e}")
+            import traceback
+            traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+    else:
+        return jsonify({"error": f"Voice '{voice_key}' not found"}), 404
 
 
 @app.route("/api/voices", methods=["GET"])
