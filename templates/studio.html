@@ -1,0 +1,1320 @@
+<!doctype html>
+<html class="scroll-smooth" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Sonic Studio | Sonic Curator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary": "#ffffff",
+              outline: "#777586",
+              "on-tertiary": "#ffffff",
+              "on-error-container": "#93000a",
+              "on-secondary-container": "#006172",
+              tertiary: "#00423c",
+              "on-surface-variant": "#464554",
+              "on-secondary-fixed-variant": "#004e5c",
+              "on-tertiary-container": "#69d6c9",
+              primary: "#2a14b4",
+              "surface-container": "#e5eeff",
+              "tertiary-fixed-dim": "#6bd8cb",
+              "error-container": "#ffdad6",
+              "primary-fixed": "#e3dfff",
+              "inverse-surface": "#213145",
+              "on-error": "#ffffff",
+              "secondary-fixed-dim": "#4cd7f6",
+              "surface-variant": "#d3e4fe",
+              "on-primary-fixed-variant": "#372abf",
+              "tertiary-fixed": "#89f5e7",
+              "secondary-fixed": "#acedff",
+              "surface-container-low": "#eff4ff",
+              "on-tertiary-fixed-variant": "#005049",
+              "primary-container": "#4338ca",
+              "surface-bright": "#f8f9ff",
+              background: "#f8f9ff",
+              "on-primary-container": "#c1beff",
+              "inverse-primary": "#c3c0ff",
+              "primary-fixed-dim": "#c3c0ff",
+              "outline-variant": "#c7c4d7",
+              "surface-container-high": "#dce9ff",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed": "#100069",
+              surface: "#f8f9ff",
+              "on-tertiary-fixed": "#00201d",
+              "on-surface": "#0b1c30",
+              "tertiary-container": "#005c54",
+              "on-secondary": "#ffffff",
+              secondary: "#00687a",
+              "surface-tint": "#5148d7",
+              "inverse-on-surface": "#eaf1ff",
+              error: "#ba1a1a",
+              "secondary-container": "#57dffe",
+              "surface-container-highest": "#d3e4fe",
+              "surface-dim": "#cbdbf5",
+              "on-secondary-fixed": "#001f26",
+              "on-background": "#0b1c30",
+            },
+            fontFamily: {
+              headline: ["Manrope"],
+              body: ["Inter"],
+              label: ["Inter"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "1.5rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      @keyframes wave {
+        0%,
+        100% {
+          transform: scaleY(0.3);
+        }
+        50% {
+          transform: scaleY(1);
+        }
+      }
+      @keyframes spin-slow {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes progress {
+        from {
+          width: 0%;
+        }
+        to {
+          width: 100%;
+        }
+      }
+      .bar-anim {
+        animation: wave 1s ease-in-out infinite;
+      }
+      .bar-anim:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .bar-anim:nth-child(2) {
+        animation-delay: 0.08s;
+      }
+      .bar-anim:nth-child(3) {
+        animation-delay: 0.16s;
+      }
+      .bar-anim:nth-child(4) {
+        animation-delay: 0.24s;
+      }
+      .bar-anim:nth-child(5) {
+        animation-delay: 0.32s;
+      }
+      .bar-anim:nth-child(6) {
+        animation-delay: 0.4s;
+      }
+      .bar-anim:nth-child(7) {
+        animation-delay: 0.48s;
+      }
+      .bar-anim:nth-child(8) {
+        animation-delay: 0.56s;
+      }
+      .bar-anim:nth-child(9) {
+        animation-delay: 0.64s;
+      }
+      .bar-anim:nth-child(10) {
+        animation-delay: 0.72s;
+      }
+      .bar-anim:nth-child(11) {
+        animation-delay: 0.8s;
+      }
+      .bar-anim:nth-child(12) {
+        animation-delay: 0.88s;
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+      }
+      .tab-active {
+        background: #2a14b4;
+        color: white;
+      }
+      .tab-inactive {
+        background: transparent;
+        color: #464554;
+      }
+      .voice-card-active {
+        border-color: #2a14b4;
+        background: #e3dfff;
+      }
+      .recording-pulse {
+        animation: spin-slow 2s linear infinite;
+      }
+      .speed-btn {
+        border: 1px solid #c7c4d7;
+        transition:
+          transform 0.15s ease,
+          background-color 0.15s ease;
+      }
+      .speed-btn:hover {
+        transform: translateY(-1px);
+      }
+      .animate-wave {
+        animation: wave 1s ease-in-out infinite;
+      }
+      .delay-100 {
+        animation-delay: 0.1s;
+      }
+      .delay-200 {
+        animation-delay: 0.2s;
+      }
+      .hover-lift {
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      .hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .fade-in-up {
+        animation: fadeInUp 0.5s ease-out forwards;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-surface font-body text-on-surface min-h-screen">
+    <!-- Top Nav -->
+    <nav
+      class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-3xl shadow-[0_24px_48px_-12px_rgba(11,28,48,0.08)]"
+    >
+      <div
+        class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto"
+      >
+        <a
+          href="/"
+          class="text-2xl font-bold tracking-tighter text-indigo-700 font-headline"
+          >Sonic Curator</a
+        >
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <span
+            class="text-xs font-bold text-on-surface-variant uppercase tracking-widest"
+            >Sonic Studio v1.2</span
+          >
+        </div>
+        <a href="/">
+          <button
+            class="bg-surface-container text-on-surface px-5 py-2 rounded-xl font-bold text-sm hover:bg-surface-container-high transition-all flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Back
+          </button>
+        </a>
+      </div>
+    </nav>
+
+    <main class="pt-24 pb-16 px-4 md:px-8 max-w-7xl mx-auto">
+      <!-- Tab Navigation -->
+      <div
+        class="flex gap-2 mt-8 mb-10 bg-surface-container-low p-1 rounded-xl w-fit"
+      >
+        <button
+          id="tab-tts"
+          onclick="switchTab('tts')"
+          class="tab-active px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2"
+        >
+          <span class="material-symbols-outlined text-sm">keyboard</span>
+          Text-to-Speech
+        </button>
+        <button
+          id="tab-clone"
+          onclick="switchTab('clone')"
+          class="tab-inactive px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2"
+        >
+          <span class="material-symbols-outlined text-sm">mic</span> Voice
+          Studio
+        </button>
+      </div>
+
+      <!-- ======================== TTS PANEL ======================== -->
+      <div id="panel-tts" class="animate-fade-in">
+        <div
+          class="bg-surface-container-lowest rounded-xl shadow-2xl overflow-hidden border border-outline-variant/10"
+        >
+          <!-- Studio Header Bar -->
+          <div
+            class="bg-surface-container p-4 flex items-center justify-between"
+          >
+            <div>
+              <span
+                class="text-xs font-bold text-primary uppercase tracking-widest"
+                >TTS Studio</span
+              >
+            </div>
+            <span
+              class="text-xs font-bold text-on-surface-variant tracking-widest uppercase"
+              >Text-to-Speech Engine</span
+            >
+            <div></div>
+          </div>
+
+          <div class="p-8 space-y-8">
+            <!-- Voice Selection Grid -->
+            <div id="voices" class="space-y-3">
+              <label
+                class="text-xs font-bold text-on-surface-variant uppercase tracking-wider px-1"
+                >Choose Voice Profile</label
+              >
+              <div
+                class="grid grid-cols-2 md:grid-cols-4 gap-3"
+                id="voice-cards"
+              >
+                {% for key, voice in voices.items() %}
+                <div
+                  class="voice-card border-2 border-outline-variant/20 rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-all hover-lift"
+                  data-key="{{ key }}"
+                  onclick="selectVoice('{{ key }}', this)"
+                >
+                  <div class="flex items-center gap-2 mb-1">
+                    <span
+                      class="material-symbols-outlined text-sm {% if voice.gender == 'male' %}text-primary{% else %}text-secondary{% endif %}"
+                    >
+                      {% if voice.gender == 'male' %}person{% else %}person_2{%
+                      endif %}
+                    </span>
+                    <span class="font-bold text-sm text-on-surface"
+                      >{{ voice.name }}</span
+                    >
+                  </div>
+                  <p class="text-xs text-on-surface-variant leading-tight">
+                    {{ voice.desc }}
+                  </p>
+                  <div class="mt-2 flex items-center gap-1">
+                    <span
+                      class="text-xs bg-surface-container px-2 py-0.5 rounded-full font-medium text-on-surface-variant"
+                      >{{ voice.lang.upper() }}</span
+                    >
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- User Trained Voices -->
+            <div
+              id="user-voices-section"
+              class="space-y-3"
+              style="display: none"
+            >
+              <label
+                class="text-xs font-bold text-on-surface-variant uppercase tracking-wider px-1"
+                >User Trained Voices</label
+              >
+              <div
+                class="grid grid-cols-2 md:grid-cols-4 gap-3"
+                id="user-voices"
+              >
+                <!-- User trained voices will be added here -->
+              </div>
+            </div>
+
+            <!-- Script Input -->
+            <div class="space-y-2">
+              <div class="flex justify-between items-center">
+                <label
+                  class="text-xs font-bold text-on-surface-variant uppercase tracking-wider px-1"
+                  >Script Composition</label
+                >
+                <span id="char-count" class="text-xs text-on-surface-variant"
+                  >0 / 3000</span
+                >
+              </div>
+              <textarea
+                id="tts-text"
+                oninput="updateCharCount()"
+                class="w-full bg-surface-container-low border-none rounded-xl p-6 text-on-surface focus:ring-2 focus:ring-primary/40 leading-relaxed placeholder:text-outline-variant resize-none"
+                placeholder="Enter your script here to begin the synthesis process..."
+                rows="6"
+              ></textarea>
+            </div>
+
+            <!-- Controls Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 py-2">
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <label
+                    class="text-xs font-bold text-on-surface-variant uppercase tracking-wider"
+                    >Speed</label
+                  >
+                  <span id="speed-label" class="text-xs font-bold text-primary"
+                    >Normal</span
+                  >
+                </div>
+                <input id="speed-toggle" type="checkbox" class="hidden" />
+                <div class="flex gap-2">
+                  <button
+                    onclick="setSpeed(false)"
+                    id="btn-normal"
+                    class="flex-1 py-2 rounded-xl text-xs font-bold bg-primary text-white transition-all"
+                  >
+                    Normal
+                  </button>
+                  <button
+                    onclick="setSpeed(true)"
+                    id="btn-slow"
+                    class="flex-1 py-2 rounded-xl text-xs font-bold bg-surface-container text-on-surface-variant transition-all"
+                  >
+                    Slow
+                  </button>
+                </div>
+              </div>
+              <div class="space-y-3">
+                <label
+                  class="text-xs font-bold text-on-surface-variant uppercase tracking-wider"
+                  >Selected Voice</label
+                >
+                <div
+                  id="voice-display"
+                  class="bg-surface-container-low rounded-xl px-4 py-3 text-sm font-semibold text-primary"
+                >
+                  — Select a voice above —
+                </div>
+              </div>
+              <div class="space-y-3">
+                <label
+                  class="text-xs font-bold text-on-surface-variant uppercase tracking-wider"
+                  >Format</label
+                >
+                <div
+                  class="bg-surface-container-low rounded-xl px-4 py-3 text-sm font-semibold text-on-surface flex items-center gap-2"
+                >
+                  <span class="material-symbols-outlined text-sm text-secondary"
+                    >audio_file</span
+                  >
+                  MP3 (Google TTS)
+                </div>
+              </div>
+            </div>
+
+            <!-- Generate Button & Player -->
+            <div
+              class="flex flex-col md:flex-row items-center gap-6 pt-6 border-t border-outline-variant/10"
+            >
+              <button
+                onclick="generateTTS()"
+                id="generate-btn"
+                class="w-full md:w-auto bg-gradient-to-r from-primary to-primary-container text-on-primary px-10 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all"
+              >
+                <span class="material-symbols-outlined">bolt</span>
+                Generate Voice
+              </button>
+
+              <!-- Audio Player -->
+              <div
+                id="player-container"
+                class="flex-1 w-full bg-surface-container-low rounded-xl p-4 flex flex-col gap-3 hidden"
+              >
+                <div class="flex items-center gap-3 text-xs">
+                  <span class="font-bold">Playback rate</span>
+                  <button
+                    id="rate-1x"
+                    class="speed-btn px-2 py-1 rounded-md bg-primary text-white"
+                  >
+                    1x
+                  </button>
+                  <button
+                    id="rate-1_5x"
+                    class="speed-btn px-2 py-1 rounded-md bg-surface-container text-on-surface-variant"
+                  >
+                    1.5x
+                  </button>
+                  <button
+                    id="rate-2x"
+                    class="speed-btn px-2 py-1 rounded-md bg-surface-container text-on-surface-variant"
+                  >
+                    2x
+                  </button>
+                  <span id="current-rate" class="font-semibold text-primary"
+                    >1x</span
+                  >
+                </div>
+                <div class="flex items-center gap-4">
+                  <button
+                    onclick="togglePlay()"
+                    id="play-btn"
+                    class="bg-primary-container text-on-primary-container w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-all"
+                  >
+                    <span class="material-symbols-outlined" id="play-icon"
+                      >play_arrow</span
+                    >
+                  </button>
+                </div>
+                <!-- Waveform bars -->
+                <div
+                  class="flex-1 flex items-center gap-[2px] h-10"
+                  id="waveform-bars"
+                >
+                  {% for i in range(24) %}
+                  <div
+                    class="bar-anim w-1 bg-primary rounded-full"
+                    style="height: {{ [8,16,24,12,20,28,10,22,18,14,26,8,20,16,24,12,18,22,8,28,14,20,16,10][i] }}px;"
+                  ></div>
+                  {% endfor %}
+                </div>
+                <audio id="audio-player" onended="onAudioEnded()"></audio>
+                <a
+                  id="download-btn"
+                  href="#"
+                  download="sonic_output.mp3"
+                  class="text-on-surface-variant hover:text-primary transition-all"
+                >
+                  <span class="material-symbols-outlined">download</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Status Message -->
+            <div
+              id="status-msg"
+              class="hidden rounded-xl px-4 py-3 text-sm font-medium"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== VOICE STUDIO PANEL ======================== -->
+      <div id="panel-clone" class="hidden animate-fade-in" id="cloning">
+        <div class="grid lg:grid-cols-2 gap-8">
+          <!-- Left: Upload / Record -->
+          <div class="space-y-6">
+            <div
+              class="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/15 overflow-hidden"
+            >
+              <div
+                class="bg-surface-container p-4 flex items-center justify-between"
+              >
+                <div class="flex gap-2">
+                  <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                  <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                  <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                </div>
+                <span
+                  class="text-xs font-bold text-on-surface-variant tracking-widest uppercase"
+                  >Voice Training Lab</span
+                >
+                <div></div>
+              </div>
+
+              <div class="p-8 space-y-8">
+                <!-- Upload Zone -->
+                <div>
+                  <label
+                    class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-3 block"
+                    >Upload Voice Sample</label
+                  >
+                  <div
+                    id="drop-zone"
+                    ondragover="
+                      event.preventDefault();
+                      this.classList.add('border-primary');
+                    "
+                    ondragleave="this.classList.remove('border-primary')"
+                    ondrop="handleDrop(event)"
+                    class="border-2 border-dashed border-outline-variant/30 rounded-xl p-10 text-center group cursor-pointer hover:border-primary/50 transition-all"
+                    onclick="document.getElementById('file-input').click()"
+                  >
+                    <span
+                      class="material-symbols-outlined text-5xl text-outline-variant mb-4 block group-hover:text-primary transition-all"
+                      >cloud_upload</span
+                    >
+                    <p class="font-bold text-on-surface">
+                      Drag & drop your voice sample
+                    </p>
+                    <p class="text-sm text-on-surface-variant mt-2">
+                      WAV, MP3, M4A or OGG (Max 10MB)
+                    </p>
+                    <input
+                      type="file"
+                      id="file-input"
+                      accept=".wav,.mp3,.m4a,.ogg"
+                      class="hidden"
+                      onchange="handleFileSelect(this)"
+                    />
+                  </div>
+                  <div
+                    id="file-preview"
+                    class="hidden mt-3 bg-surface-container-low rounded-xl px-4 py-3 flex items-center justify-between"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-secondary"
+                        >audio_file</span
+                      >
+                      <span
+                        id="file-name"
+                        class="text-sm font-semibold text-on-surface"
+                      ></span>
+                    </div>
+                    <button
+                      onclick="clearFile()"
+                      class="text-on-surface-variant hover:text-error transition-all"
+                    >
+                      <span class="material-symbols-outlined text-sm"
+                        >close</span
+                      >
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                  <div class="h-px flex-1 bg-outline-variant/20"></div>
+                  <span
+                    class="text-xs font-bold text-on-surface-variant uppercase"
+                    >Or</span
+                  >
+                  <div class="h-px flex-1 bg-outline-variant/20"></div>
+                </div>
+
+                <!-- Live Recording -->
+                <div class="space-y-4">
+                  <label
+                    class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block"
+                    >Record Live Sample</label
+                  >
+                  <div class="flex items-center gap-4">
+                    <button
+                      id="record-btn"
+                      onclick="toggleRecording()"
+                      class="flex-1 border-2 border-secondary text-secondary font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-secondary/5 transition-all"
+                    >
+                      <span class="material-symbols-outlined" id="record-icon"
+                        >mic</span
+                      >
+                      <span id="record-label">Start Recording</span>
+                    </button>
+                    <div
+                      id="record-timer"
+                      class="hidden text-lg font-bold text-error font-headline"
+                    >
+                      0:00
+                    </div>
+                  </div>
+                  <!-- Recording visualizer -->
+                  <div
+                    id="record-viz"
+                    class="hidden bg-surface-container-low rounded-xl p-4"
+                  >
+                    <div class="flex items-center gap-2 mb-3">
+                      <div
+                        class="w-2 h-2 bg-error rounded-full animate-pulse"
+                      ></div>
+                      <span
+                        class="text-xs font-bold text-error uppercase tracking-wider"
+                        >Recording...</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-[2px] h-8">
+                      {% for i in range(20) %}
+                      <div
+                        class="bar-anim w-1 bg-error/60 rounded-full"
+                        style="height:{{ [6,14,20,10,18,24,8,18,14,12,22,6,16,12,20,10,16,18,6,24][i] }}px;"
+                      ></div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <!-- Recorded audio preview -->
+                  <div
+                    id="recording-preview"
+                    class="hidden bg-surface-container-low rounded-xl p-4 flex items-center gap-3"
+                  >
+                    <button
+                      onclick="playRecording()"
+                      class="w-8 h-8 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center"
+                    >
+                      <span class="material-symbols-outlined text-sm"
+                        >play_arrow</span
+                      >
+                    </button>
+                    <span class="text-sm font-medium text-on-surface flex-1"
+                      >Recorded sample ready</span
+                    >
+                    <button
+                      onclick="clearRecording()"
+                      class="text-on-surface-variant hover:text-error transition-all"
+                    >
+                      <span class="material-symbols-outlined text-sm"
+                        >close</span
+                      >
+                    </button>
+                    <audio id="recorded-audio"></audio>
+                  </div>
+                </div>
+
+                <!-- Voice Name Input -->
+                <div class="space-y-2">
+                  <label
+                    class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block"
+                    >Voice Name</label
+                  >
+                  <input
+                    id="voice-name"
+                    type="text"
+                    placeholder="Enter a name for your custom voice"
+                    class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all"
+                    maxlength="50"
+                  />
+                </div>
+
+                <!-- Ethics Notice -->
+                <div class="p-4 bg-error-container/20 rounded-xl flex gap-3">
+                  <span
+                    class="material-symbols-outlined text-error flex-shrink-0"
+                    >gavel</span
+                  >
+                  <div>
+                    <p
+                      class="text-xs font-bold text-on-error-container uppercase mb-1"
+                    >
+                      Ethical Notice
+                    </p>
+                    <p class="text-sm text-on-surface-variant">
+                      Only upload voices you own or have explicit written
+                      permission to use. We maintain a zero-tolerance policy for
+                      non-consensual voice deepfakes.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                  onclick="submitVoiceTraining()"
+                  id="train-btn"
+                  class="w-full bg-gradient-to-r from-secondary to-tertiary text-on-secondary px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all"
+                >
+                  <span class="material-symbols-outlined">model_training</span>
+                  Submit Voice for Training
+                </button>
+
+                <div
+                  id="train-status"
+                  class="hidden rounded-xl px-4 py-3 text-sm font-medium"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Training Samples + Visuals -->
+          <div class="space-y-4">
+            <div
+              class="bg-surface-container-lowest rounded-xl shadow-md border border-outline-variant/15 p-6 animate-fade-in"
+            >
+              <p class="text-sm font-bold text-primary mb-2">
+                Training Voice Text
+              </p>
+              <ul class="text-sm text-on-surface-variant space-y-2">
+                <li>
+                  • “Hello, this is your voice training sample for better
+                  timing.”
+                </li>
+                <li>
+                  • “Pinpoint prosody with sentence-level chunk playback.”
+                </li>
+                <li>
+                  • “Every word should come out quickly to reduce latency.”
+                </li>
+              </ul>
+              <div class="mt-3 grid grid-cols-3 gap-2">
+                <div class="h-2 bg-primary rounded-full animate-wave"></div>
+                <div
+                  class="h-2 bg-secondary rounded-full animate-wave delay-100"
+                ></div>
+                <div
+                  class="h-2 bg-tertiary rounded-full animate-wave delay-200"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Predefined Voice Library + Info -->
+          <div class="space-y-6">
+            <div
+              class="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/15 p-8"
+            >
+              <div class="space-y-4 mb-6">
+                <span
+                  class="text-secondary font-bold tracking-widest text-sm uppercase"
+                  >Voice Library</span
+                >
+                <h2 class="text-2xl font-extrabold font-headline">
+                  Available Voice Profiles
+                </h2>
+                <p class="text-on-surface-variant text-sm leading-relaxed">
+                  Choose from our curated roster of voices across languages and
+                  accents, or build your own.
+                </p>
+              </div>
+              <div class="space-y-3">
+                {% for key, voice in voices.items() %}
+                <div
+                  class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-all cursor-pointer group"
+                  onclick="goToVoice('{{ key }}')"
+                >
+                  <div
+                    class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 {% if voice.gender == 'male' %}bg-primary/10 text-primary{% else %}bg-secondary/10 text-secondary{% endif %}"
+                  >
+                    <span class="material-symbols-outlined text-lg"
+                      >{% if voice.gender == 'male' %}person{% else %}person_2{%
+                      endif %}</span
+                    >
+                  </div>
+                  <div class="flex-1">
+                    <p class="font-bold text-sm text-on-surface">
+                      {{ voice.name }}
+                    </p>
+                    <p class="text-xs text-on-surface-variant">
+                      {{ voice.desc }}
+                    </p>
+                  </div>
+                  <span
+                    class="text-xs bg-surface-container px-2 py-0.5 rounded-full font-medium text-on-surface-variant"
+                    >{{ voice.lang.upper() }}</span
+                  >
+                  <span
+                    class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-all text-sm"
+                    >arrow_forward</span
+                  >
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Feature Highlights -->
+            <div
+              class="bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-8 space-y-4"
+            >
+              <h3 class="font-bold font-headline text-on-surface">
+                Training Capabilities
+              </h3>
+              <ul class="space-y-3">
+                <li
+                  class="flex gap-3 items-center font-medium text-on-surface text-sm"
+                >
+                  <span class="material-symbols-outlined text-primary text-xl"
+                    >check_circle</span
+                  >
+                  High-fidelity spectral matching from your samples
+                </li>
+                <li
+                  class="flex gap-3 items-center font-medium text-on-surface text-sm"
+                >
+                  <span class="material-symbols-outlined text-primary text-xl"
+                    >check_circle</span
+                  >
+                  Live recording in browser — no extra software needed
+                </li>
+                <li
+                  class="flex gap-3 items-center font-medium text-on-surface text-sm"
+                >
+                  <span class="material-symbols-outlined text-primary text-xl"
+                    >check_circle</span
+                  >
+                  WAV / MP3 / M4A sample upload support
+                </li>
+                <li
+                  class="flex gap-3 items-center font-medium text-on-surface text-sm"
+                >
+                  <span class="material-symbols-outlined text-primary text-xl"
+                    >check_circle</span
+                  >
+                  Consent-first design with full ownership of your voice
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // ─── State ───────────────────────────────────────────────────────────
+      let selectedVoice = null;
+      let slowMode = false;
+      let mediaRecorder = null;
+      let recordedChunks = [];
+      let recordedBlob = null;
+      let isRecording = false;
+      let recordTimer = null;
+      let recordSeconds = 0;
+      let uploadedFile = null;
+      let playbackRate = 1.0;
+      let chunkQueue = [];
+      let playInProgress = false;
+
+      // ─── Tab Switching ────────────────────────────────────────────────────
+      function switchTab(tab) {
+        const ttsPanel = document.getElementById("panel-tts");
+        const clonePanel = document.getElementById("panel-clone");
+        const ttsTab = document.getElementById("tab-tts");
+        const cloneTab = document.getElementById("tab-clone");
+        if (tab === "tts") {
+          ttsPanel.classList.remove("hidden");
+          clonePanel.classList.add("hidden");
+          ttsTab.classList.add("tab-active");
+          ttsTab.classList.remove("tab-inactive");
+          cloneTab.classList.remove("tab-active");
+          cloneTab.classList.add("tab-inactive");
+        } else {
+          clonePanel.classList.remove("hidden");
+          ttsPanel.classList.add("hidden");
+          cloneTab.classList.add("tab-active");
+          cloneTab.classList.remove("tab-inactive");
+          ttsTab.classList.remove("tab-active");
+          ttsTab.classList.add("tab-inactive");
+        }
+      }
+
+      // ─── Voice Selection ──────────────────────────────────────────────────
+      function selectVoice(key, el) {
+        document.querySelectorAll(".voice-card").forEach((c) => {
+          c.classList.remove("voice-card-active");
+          c.style.borderColor = "";
+        });
+        el.classList.add("voice-card-active");
+        selectedVoice = key;
+        const name = el.querySelector(".font-bold").textContent;
+        const desc = el.querySelector(
+          ".text-xs.text-on-surface-variant",
+        ).textContent;
+        document.getElementById("voice-display").textContent =
+          `${name} — ${desc}`;
+      }
+
+      // ─── Speed ───────────────────────────────────────────────────────────
+      function setSpeed(slow) {
+        slowMode = slow;
+        document.getElementById("btn-normal").className =
+          `flex-1 py-2 rounded-xl text-xs font-bold transition-all ${!slow ? "bg-primary text-white" : "bg-surface-container text-on-surface-variant"}`;
+        document.getElementById("btn-slow").className =
+          `flex-1 py-2 rounded-xl text-xs font-bold transition-all ${slow ? "bg-primary text-white" : "bg-surface-container text-on-surface-variant"}`;
+        document.getElementById("speed-label").textContent = slow
+          ? "Slow"
+          : "Normal";
+      }
+
+      function bindRateControls() {
+        document.getElementById("rate-1x").onclick = () => setPlaybackRate(1);
+        document.getElementById("rate-1_5x").onclick = () =>
+          setPlaybackRate(1.5);
+        document.getElementById("rate-2x").onclick = () => setPlaybackRate(2);
+      }
+
+      bindRateControls();
+      setPlaybackRate(1);
+
+      // ─── Char Count ───────────────────────────────────────────────────────
+      function updateCharCount() {
+        const len = document.getElementById("tts-text").value.length;
+        const el = document.getElementById("char-count");
+        el.textContent = `${len} / 3000`;
+        el.className =
+          len > 2700 ? "text-xs text-error" : "text-xs text-on-surface-variant";
+      }
+
+      // ─── TTS Generation ───────────────────────────────────────────────────
+      async function generateTTS() {
+        const text = document.getElementById("tts-text").value.trim();
+        if (!text) {
+          showStatus("tts", "⚠️ Please enter some text first.", "warn");
+          return;
+        }
+        if (!selectedVoice) {
+          showStatus("tts", "⚠️ Please select a voice profile.", "warn");
+          return;
+        }
+
+        const btn = document.getElementById("generate-btn");
+        btn.disabled = true;
+        btn.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> Generating...`;
+        chunkQueue = [];
+        playInProgress = false;
+        document.getElementById("player-container").classList.add("hidden");
+        showStatus(
+          "tts",
+          "🎙️ Preparing streaming-like audio chunks...",
+          "info",
+        );
+
+        const chunks = text
+          .split(/(?<=[.!?])\s+/)
+          .filter((item) => item.trim().length > 0);
+
+        try {
+          for (let i = 0; i < chunks.length; i++) {
+            const chunkText = chunks[i];
+            const res = await fetch("/api/synthesize-chunk", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                text: chunkText,
+                voice: selectedVoice,
+                slow: slowMode,
+              }),
+            });
+            const data = await res.json();
+            if (!data.success) {
+              throw new Error(data.error || "Chunk generation failed");
+            }
+            chunkQueue.push({ url: data.audio_url, text: chunkText });
+            showStatus(
+              "tts",
+              `⚡ Chunk ${i + 1}/${chunks.length} ready - playing now...`,
+              "info",
+            );
+
+            if (!playInProgress) {
+              document
+                .getElementById("player-container")
+                .classList.remove("hidden");
+              playNextChunk();
+            }
+          }
+
+          showStatus(
+            "tts",
+            "✅ All chunks queued, playback in progress.",
+            "success",
+          );
+          document.getElementById("download-btn").href =
+            chunkQueue.length > 0 ? chunkQueue[chunkQueue.length - 1].url : "#";
+        } catch (e) {
+          showStatus("tts", `❌ ${e.message}`, "error");
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = `<span class="material-symbols-outlined">bolt</span> Generate Voice`;
+        }
+      }
+
+      function playNextChunk() {
+        if (chunkQueue.length === 0) {
+          playInProgress = false;
+          document.getElementById("play-icon").textContent = "play_arrow";
+          return;
+        }
+
+        playInProgress = true;
+        const chunk = chunkQueue.shift();
+        const audio = document.getElementById("audio-player");
+        audio.src = chunk.url;
+        audio.playbackRate = playbackRate;
+        audio.onended = () => setTimeout(playNextChunk, 80);
+        document.getElementById("play-icon").textContent = "pause";
+        audio.play().catch(() => {});
+      }
+
+      function setPlaybackRate(rate) {
+        playbackRate = rate;
+        document.getElementById("current-rate").textContent =
+          `${rate.toFixed(1)}x`;
+        const audio = document.getElementById("audio-player");
+        audio.playbackRate = rate;
+
+        document.querySelectorAll(".speed-btn").forEach((btn) => {
+          btn.classList.remove("bg-primary", "text-white");
+          btn.classList.add("bg-surface-container", "text-on-surface-variant");
+        });
+
+        const target = document.getElementById(
+          rate === 1 ? "rate-1x" : rate === 1.5 ? "rate-1_5x" : "rate-2x",
+        );
+        if (target) {
+          target.classList.remove(
+            "bg-surface-container",
+            "text-on-surface-variant",
+          );
+          target.classList.add("bg-primary", "text-white");
+        }
+      }
+
+      // ─── Audio Player ─────────────────────────────────────────────────────
+      function togglePlay() {
+        const audio = document.getElementById("audio-player");
+        const icon = document.getElementById("play-icon");
+        const bars = document.querySelectorAll("#waveform .bar");
+        if (audio.paused) {
+          audio.play();
+          icon.textContent = "pause";
+          bars.forEach((bar) => bar.classList.add("bar-anim"));
+        } else {
+          audio.pause();
+          icon.textContent = "play_arrow";
+          bars.forEach((bar) => bar.classList.remove("bar-anim"));
+        }
+      }
+      function onAudioEnded() {
+        document.getElementById("play-icon").textContent = "play_arrow";
+        const bars = document.querySelectorAll("#waveform .bar");
+        bars.forEach((bar) => bar.classList.remove("bar-anim"));
+      }
+
+      // ─── Status Messages ──────────────────────────────────────────────────
+      function showStatus(section, msg, type) {
+        const id = section === "tts" ? "status-msg" : "train-status";
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.className = `rounded-xl px-4 py-3 text-sm font-medium animate-fade-in ${
+          type === "success"
+            ? "bg-green-50 text-green-700"
+            : type === "error"
+              ? "bg-error-container text-on-error-container"
+              : type === "warn"
+                ? "bg-yellow-50 text-yellow-700"
+                : "bg-surface-container text-on-surface-variant"
+        }`;
+        el.classList.remove("hidden");
+      }
+
+      // ─── File Upload ──────────────────────────────────────────────────────
+      function handleFileSelect(input) {
+        if (input.files[0]) setFile(input.files[0]);
+      }
+      function handleDrop(event) {
+        event.preventDefault();
+        document.getElementById("drop-zone").classList.remove("border-primary");
+        const f = event.dataTransfer.files[0];
+        if (f) setFile(f);
+      }
+      function setFile(f) {
+        uploadedFile = f;
+        document.getElementById("file-name").textContent = f.name;
+        document.getElementById("file-preview").classList.remove("hidden");
+      }
+      function clearFile() {
+        uploadedFile = null;
+        document.getElementById("file-input").value = "";
+        document.getElementById("file-preview").classList.add("hidden");
+      }
+
+      // ─── Live Recording ───────────────────────────────────────────────────
+      async function toggleRecording() {
+        if (!isRecording) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              audio: true,
+            });
+            recordedChunks = [];
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = (e) => {
+              if (e.data.size > 0) recordedChunks.push(e.data);
+            };
+            mediaRecorder.onstop = () => {
+              recordedBlob = new Blob(recordedChunks, { type: "audio/webm" });
+              const url = URL.createObjectURL(recordedBlob);
+              document.getElementById("recorded-audio").src = url;
+              document
+                .getElementById("recording-preview")
+                .classList.remove("hidden");
+              stream.getTracks().forEach((t) => t.stop());
+            };
+            mediaRecorder.start();
+            isRecording = true;
+            recordSeconds = 0;
+            showStatus(
+              "train",
+              "🎤 Recording started! Speak clearly for best results.",
+              "info",
+            );
+            document.getElementById("record-icon").textContent = "stop";
+            document.getElementById("record-label").textContent =
+              "Stop Recording";
+            document.getElementById("record-btn").className =
+              "flex-1 border-2 border-error text-error font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-error/5 transition-all";
+            document.getElementById("record-viz").classList.remove("hidden");
+            document.getElementById("record-timer").classList.remove("hidden");
+            document
+              .getElementById("recording-preview")
+              .classList.add("hidden");
+            recordTimer = setInterval(() => {
+              recordSeconds++;
+              const m = Math.floor(recordSeconds / 60);
+              const s = recordSeconds % 60;
+              document.getElementById("record-timer").textContent =
+                `${m}:${s.toString().padStart(2, "0")}`;
+            }, 1000);
+          } catch (e) {
+            showStatus(
+              "train",
+              "❌ Microphone access denied. Please allow mic permissions.",
+              "error",
+            );
+          }
+        } else {
+          mediaRecorder.stop();
+          isRecording = false;
+          clearInterval(recordTimer);
+          document.getElementById("record-icon").textContent = "mic";
+          document.getElementById("record-label").textContent =
+            "Start Recording";
+          document.getElementById("record-btn").className =
+            "flex-1 border-2 border-secondary text-secondary font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-secondary/5 transition-all";
+          document.getElementById("record-viz").classList.add("hidden");
+          document.getElementById("record-timer").classList.add("hidden");
+        }
+      }
+
+      function playRecording() {
+        const a = document.getElementById("recorded-audio");
+        a.paused ? a.play() : a.pause();
+      }
+
+      function clearRecording() {
+        recordedBlob = null;
+        document.getElementById("recording-preview").classList.add("hidden");
+      }
+
+      // ─── Voice Training Submit ────────────────────────────────────────────
+      async function submitVoiceTraining() {
+        const file =
+          uploadedFile ||
+          (recordedBlob ? new File([recordedBlob], "recording.webm") : null);
+        if (!file) {
+          showStatus(
+            "train",
+            "⚠️ Please upload a file or record a voice sample first.",
+            "warn",
+          );
+          return;
+        }
+
+        const btn = document.getElementById("train-btn");
+        btn.disabled = true;
+        btn.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> Submitting...`;
+        showStatus(
+          "train",
+          "⏳ Uploading sample to training pipeline...",
+          "info",
+        );
+
+        const formData = new FormData();
+        formData.append("audio", file, file.name || "recording.webm");
+
+        try {
+          const res = await fetch("/api/upload-clone", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          if (data.success) {
+            showStatus("train", `✅ ${data.message}`, "success");
+            // Add to user trained voices
+            const voiceName =
+              document.getElementById("voice-name").value.trim() ||
+              "Custom Voice";
+            addUserVoice(voiceName);
+            document.getElementById("voice-name").value = ""; // Clear input
+          } else {
+            showStatus("train", `❌ ${data.error}`, "error");
+          }
+        } catch (e) {
+          showStatus("train", `❌ Upload failed: ${e.message}`, "error");
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = `<span class="material-symbols-outlined">model_training</span> Submit Voice for Training`;
+        }
+      }
+
+      // ─── Add user trained voice to the grid ──────────────────────────────
+      function addUserVoice(name) {
+        const userVoicesSection = document.getElementById(
+          "user-voices-section",
+        );
+        const userVoicesGrid = document.getElementById("user-voices");
+        const key = `user-${Date.now()}`; // Unique key
+
+        const voiceCard = document.createElement("div");
+        voiceCard.className =
+          "voice-card border-2 border-outline-variant/20 rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-all hover-lift";
+        voiceCard.setAttribute("data-key", key);
+        voiceCard.onclick = () => selectVoice(key, voiceCard);
+
+        voiceCard.innerHTML = `
+          <div class="flex items-center gap-2 mb-1">
+            <span class="material-symbols-outlined text-sm text-primary">person</span>
+            <span class="font-bold text-sm text-on-surface">${name}</span>
+          </div>
+          <p class="text-xs text-on-surface-variant leading-tight">User trained voice</p>
+          <div class="mt-2 flex items-center gap-1">
+            <span class="text-xs bg-surface-container px-2 py-0.5 rounded-full font-medium text-on-surface-variant">EN</span>
+          </div>
+        `;
+
+        userVoicesGrid.appendChild(voiceCard);
+        userVoicesSection.style.display = "block"; // Show the section
+        userVoicesSection.classList.add("fade-in-up");
+
+        // Add to voices object for selection
+        voices[key] = {
+          name: name,
+          desc: "User trained voice",
+          lang: "en",
+          gender: "neutral",
+        };
+      }
+
+      // ─── Navigate to TTS with voice preselected ───────────────────────────
+      function goToVoice(key) {
+        switchTab("tts");
+        setTimeout(() => {
+          const card = document.querySelector(`.voice-card[data-key="${key}"]`);
+          if (card) {
+            selectVoice(key, card);
+            card.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 100);
+      }
+
+      // ─── Handle hash routing ──────────────────────────────────────────────
+      if (window.location.hash === "#cloning") switchTab("clone");
+    </script>
+  </body>
+</html>

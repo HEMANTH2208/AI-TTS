@@ -1,0 +1,705 @@
+<!doctype html>
+<html class="scroll-smooth" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>AI Based TTS System | AI Voice Generation</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary": "#ffffff",
+              outline: "#777586",
+              "on-tertiary": "#ffffff",
+              "on-error-container": "#93000a",
+              "on-secondary-container": "#006172",
+              tertiary: "#00423c",
+              "on-surface-variant": "#464554",
+              "on-secondary-fixed-variant": "#004e5c",
+              "on-tertiary-container": "#69d6c9",
+              primary: "#2a14b4",
+              "surface-container": "#e5eeff",
+              "tertiary-fixed-dim": "#6bd8cb",
+              "error-container": "#ffdad6",
+              "primary-fixed": "#e3dfff",
+              "inverse-surface": "#213145",
+              "on-error": "#ffffff",
+              "secondary-fixed-dim": "#4cd7f6",
+              "surface-variant": "#d3e4fe",
+              "on-primary-fixed-variant": "#372abf",
+              "tertiary-fixed": "#89f5e7",
+              "secondary-fixed": "#acedff",
+              "surface-container-low": "#eff4ff",
+              "on-tertiary-fixed-variant": "#005049",
+              "primary-container": "#4338ca",
+              "surface-bright": "#f8f9ff",
+              background: "#f8f9ff",
+              "on-primary-container": "#c1beff",
+              "inverse-primary": "#c3c0ff",
+              "primary-fixed-dim": "#c3c0ff",
+              "outline-variant": "#c7c4d7",
+              "surface-container-high": "#dce9ff",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed": "#100069",
+              surface: "#f8f9ff",
+              "on-tertiary-fixed": "#00201d",
+              "on-surface": "#0b1c30",
+              "tertiary-container": "#005c54",
+              "on-secondary": "#ffffff",
+              secondary: "#00687a",
+              "surface-tint": "#5148d7",
+              "inverse-on-surface": "#eaf1ff",
+              error: "#ba1a1a",
+              "secondary-container": "#57dffe",
+              "surface-container-highest": "#d3e4fe",
+              "surface-dim": "#cbdbf5",
+              "on-secondary-fixed": "#001f26",
+              "on-background": "#0b1c30",
+            },
+            fontFamily: {
+              headline: ["Manrope"],
+              body: ["Inter"],
+              label: ["Inter"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "1.5rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      @keyframes wave {
+        0%,
+        100% {
+          transform: scaleY(0.4);
+        }
+        50% {
+          transform: scaleY(1);
+        }
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-12px);
+        }
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes pulse-ring {
+        0% {
+          transform: scale(0.9);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1.4);
+          opacity: 0;
+        }
+      }
+      .animate-wave-1 {
+        animation: wave 1s ease-in-out infinite;
+      }
+      .animate-wave-2 {
+        animation: wave 1s ease-in-out infinite 0.1s;
+      }
+      .animate-wave-3 {
+        animation: wave 1s ease-in-out infinite 0.2s;
+      }
+      .animate-wave-4 {
+        animation: wave 1s ease-in-out infinite 0.3s;
+      }
+      .animate-wave-5 {
+        animation: wave 1s ease-in-out infinite 0.4s;
+      }
+      .animate-float {
+        animation: float 3s ease-in-out infinite;
+      }
+      .animate-fade-in-up {
+        animation: fadeInUp 0.7s ease-out forwards;
+      }
+      .delay-100 {
+        animation-delay: 0.1s;
+        opacity: 0;
+      }
+      .delay-200 {
+        animation-delay: 0.2s;
+        opacity: 0;
+      }
+      .delay-300 {
+        animation-delay: 0.3s;
+        opacity: 0;
+      }
+      .pulse-ring::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid #2a14b4;
+        animation: pulse-ring 2s ease-out infinite;
+      }
+    </style>
+  </head>
+  <body class="bg-surface font-body text-on-surface">
+    <!-- Top Navigation Bar -->
+    <nav
+      class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-3xl shadow-[0_24px_48px_-12px_rgba(11,28,48,0.08)]"
+    >
+      <div
+        class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto"
+      >
+        <span
+          class="text-2xl font-bold tracking-tighter text-indigo-700 font-headline"
+          >AI Based TTS System</span
+        >
+        <div class="hidden md:flex gap-8 items-center">
+          <a
+            class="font-semibold text-sm tracking-tight text-indigo-700 border-b-2 border-indigo-600 pb-1"
+            href="#features"
+            >Features</a
+          >
+          <a
+            class="font-semibold text-sm tracking-tight text-slate-600 hover:text-indigo-600 transition-all duration-300"
+            href="#how-it-works"
+            >How It Works</a
+          >
+          <a
+            class="font-semibold text-sm tracking-tight text-slate-600 hover:text-indigo-600 transition-all duration-300"
+            href="#ethics"
+            >Ethics</a
+          >
+        </div>
+        <a href="/studio">
+          <button
+            class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-primary-container transition-transform scale-95 active:scale-90"
+          >
+            Open Studio
+          </button>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="pt-40 pb-20 px-8 max-w-7xl mx-auto overflow-hidden">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div class="space-y-8">
+          <div class="animate-fade-in-up">
+            <span
+              class="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4"
+            >
+              <span
+                class="w-2 h-2 bg-primary rounded-full animate-pulse"
+              ></span>
+              Powered by Google TTS
+            </span>
+          </div>
+          <h1
+            class="text-6xl md:text-7xl font-extrabold font-headline leading-tight tracking-tighter text-on-surface animate-fade-in-up delay-100"
+          >
+            Generate Natural<br />
+            <span
+              class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary"
+              >AI Voices Instantly</span
+            >
+          </h1>
+          <p
+            class="text-xl text-on-surface-variant max-w-xl leading-relaxed animate-fade-in-up delay-200"
+          >
+            Transform text into lifelike speech or train with your own voice.
+            The laboratory for future-ready audio synthesis — built on Google's
+            TTS engine.
+          </p>
+          <div class="flex flex-wrap gap-4 animate-fade-in-up delay-300">
+            <a href="/studio">
+              <button
+                class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:opacity-90 transition-all"
+              >
+                Try Text-to-Speech
+              </button>
+            </a>
+            <a href="/studio#cloning">
+              <button
+                class="bg-secondary-container text-on-secondary-container px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-high transition-all"
+              >
+                Explore Voice Cloning
+              </button>
+            </a>
+          </div>
+        </div>
+
+        <!-- Animated Waveform Visualization -->
+        <div class="relative animate-float">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 blur-3xl rounded-full"
+          ></div>
+          <div
+            class="relative bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/15 shadow-2xl"
+          >
+            <div class="space-y-4">
+              <div class="flex items-center gap-3 mb-6">
+                <div
+                  class="relative pulse-ring w-10 h-10 bg-primary rounded-full flex items-center justify-center"
+                >
+                  <span class="material-symbols-outlined text-white text-xl"
+                    >graphic_eq</span
+                  >
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-on-surface">
+                    Synthesizing voice...
+                  </p>
+                  <p class="text-xs text-on-surface-variant">
+                    Arthur — Professional Narrator
+                  </p>
+                </div>
+              </div>
+              <div
+                class="h-2 bg-secondary-fixed-dim/20 rounded-full overflow-hidden"
+              >
+                <div
+                  class="h-full w-2/3 bg-gradient-to-r from-primary to-secondary rounded-full"
+                  style="animation: wave 2s ease-in-out infinite"
+                ></div>
+              </div>
+              <div
+                class="grid grid-cols-18 gap-1 h-32 items-center px-2 mt-4"
+                style="display: flex; align-items: center; gap: 3px"
+              >
+                <div
+                  style="width: 6px; height: 24px"
+                  class="bg-primary rounded-full opacity-30 animate-wave-1"
+                ></div>
+                <div
+                  style="width: 6px; height: 40px"
+                  class="bg-secondary rounded-full animate-wave-2"
+                ></div>
+                <div
+                  style="width: 6px; height: 56px"
+                  class="bg-primary rounded-full animate-wave-3"
+                ></div>
+                <div
+                  style="width: 6px; height: 32px"
+                  class="bg-secondary rounded-full opacity-70 animate-wave-4"
+                ></div>
+                <div
+                  style="width: 6px; height: 80px"
+                  class="bg-primary rounded-full animate-wave-5"
+                ></div>
+                <div
+                  style="width: 6px; height: 20px"
+                  class="bg-secondary rounded-full opacity-50 animate-wave-1"
+                ></div>
+                <div
+                  style="width: 6px; height: 64px"
+                  class="bg-primary rounded-full animate-wave-2"
+                ></div>
+                <div
+                  style="width: 6px; height: 100px"
+                  class="bg-secondary rounded-full animate-wave-3"
+                ></div>
+                <div
+                  style="width: 6px; height: 72px"
+                  class="bg-primary rounded-full opacity-80 animate-wave-4"
+                ></div>
+                <div
+                  style="width: 6px; height: 48px"
+                  class="bg-secondary rounded-full animate-wave-5"
+                ></div>
+                <div
+                  style="width: 6px; height: 88px"
+                  class="bg-primary rounded-full animate-wave-1"
+                ></div>
+                <div
+                  style="width: 6px; height: 36px"
+                  class="bg-secondary rounded-full opacity-60 animate-wave-2"
+                ></div>
+                <div
+                  style="width: 6px; height: 60px"
+                  class="bg-primary rounded-full animate-wave-3"
+                ></div>
+                <div
+                  style="width: 6px; height: 44px"
+                  class="bg-secondary rounded-full animate-wave-4"
+                ></div>
+                <div
+                  style="width: 6px; height: 76px"
+                  class="bg-primary rounded-full opacity-40 animate-wave-5"
+                ></div>
+                <div
+                  style="width: 6px; height: 28px"
+                  class="bg-secondary rounded-full animate-wave-1"
+                ></div>
+                <div
+                  style="width: 6px; height: 52px"
+                  class="bg-primary rounded-full animate-wave-2"
+                ></div>
+                <div
+                  style="width: 6px; height: 92px"
+                  class="bg-secondary rounded-full opacity-70 animate-wave-3"
+                ></div>
+              </div>
+              <div
+                class="flex items-center justify-between pt-4 border-t border-outline-variant/10"
+              >
+                <span class="text-xs text-on-surface-variant font-medium"
+                  >0:02</span
+                >
+                <div class="flex gap-3">
+                  <span
+                    class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-all"
+                    >volume_up</span
+                  >
+                  <span
+                    class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-all"
+                    >download</span
+                  >
+                </div>
+                <span class="text-xs text-on-surface-variant font-medium"
+                  >0:08</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="py-24 px-8 bg-surface-container-low" id="features">
+      <div class="max-w-7xl mx-auto">
+        <div class="mb-16">
+          <span class="text-primary font-bold tracking-widest text-sm uppercase"
+            >Capabilities</span
+          >
+          <h2 class="text-4xl font-extrabold font-headline mt-2">
+            Engineered for Perfection
+          </h2>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div
+            class="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10 hover:shadow-2xl transition-all duration-300 group"
+          >
+            <span
+              class="material-symbols-outlined text-primary text-4xl mb-6 block group-hover:scale-110 transition-transform"
+              >keyboard</span
+            >
+            <h3 class="text-xl font-bold font-headline mb-3 text-on-surface">
+              TTS Conversion
+            </h3>
+            <p class="text-on-surface-variant leading-relaxed">
+              Google's neural processing for human-like inflection and natural
+              pacing.
+            </p>
+          </div>
+          <div
+            class="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10 hover:shadow-2xl transition-all duration-300 group"
+          >
+            <span
+              class="material-symbols-outlined text-secondary text-4xl mb-6 block group-hover:scale-110 transition-transform"
+              >record_voice_over</span
+            >
+            <h3 class="text-xl font-bold font-headline mb-3 text-on-surface">
+              8 Voice Profiles
+            </h3>
+            <p class="text-on-surface-variant leading-relaxed">
+              Curated voices across English, Spanish, French, Japanese and more.
+            </p>
+          </div>
+          <div
+            class="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10 hover:shadow-2xl transition-all duration-300 group"
+          >
+            <span
+              class="material-symbols-outlined text-primary text-4xl mb-6 block group-hover:scale-110 transition-transform"
+              >mic</span
+            >
+            <h3 class="text-xl font-bold font-headline mb-3 text-on-surface">
+              Voice Training
+            </h3>
+            <p class="text-on-surface-variant leading-relaxed">
+              Upload samples or record live to build your custom voice identity.
+            </p>
+          </div>
+          <div
+            class="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10 hover:shadow-2xl transition-all duration-300 group"
+          >
+            <span
+              class="material-symbols-outlined text-secondary text-4xl mb-6 block group-hover:scale-110 transition-transform"
+              >download_for_offline</span
+            >
+            <h3 class="text-xl font-bold font-headline mb-3 text-on-surface">
+              MP3 Export
+            </h3>
+            <p class="text-on-surface-variant leading-relaxed">
+              Instant preview and one-click download of synthesized audio.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-24 px-8 bg-surface" id="how-it-works">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+          <span
+            class="text-secondary font-bold tracking-widest text-sm uppercase"
+            >Process</span
+          >
+          <h2 class="text-4xl font-extrabold font-headline mt-2">
+            Three Steps to Perfect Audio
+          </h2>
+        </div>
+        <div class="grid md:grid-cols-3 gap-12 text-center relative">
+          <div class="relative z-10 space-y-6">
+            <div
+              class="w-20 h-20 bg-surface-container-high rounded-full flex items-center justify-center mx-auto shadow-inner border border-outline-variant/10 hover:scale-110 transition-all"
+            >
+              <span class="material-symbols-outlined text-3xl text-primary"
+                >edit_note</span
+              >
+            </div>
+            <h3 class="text-xl font-bold font-headline">1. Enter Text</h3>
+            <p class="text-on-surface-variant">
+              Input your script and choose a voice profile or accent.
+            </p>
+          </div>
+          <div class="relative z-10 space-y-6">
+            <div
+              class="w-20 h-20 bg-surface-container-high rounded-full flex items-center justify-center mx-auto shadow-inner border border-outline-variant/10 hover:scale-110 transition-all"
+            >
+              <span class="material-symbols-outlined text-3xl text-secondary"
+                >memory</span
+              >
+            </div>
+            <h3 class="text-xl font-bold font-headline">2. Google Processes</h3>
+            <p class="text-on-surface-variant">
+              Google's TTS engine synthesizes natural-sounding speech in
+              real-time.
+            </p>
+          </div>
+          <div class="relative z-10 space-y-6">
+            <div
+              class="w-20 h-20 bg-surface-container-high rounded-full flex items-center justify-center mx-auto shadow-inner border border-outline-variant/10 hover:scale-110 transition-all"
+            >
+              <span class="material-symbols-outlined text-3xl text-primary"
+                >check_circle</span
+              >
+            </div>
+            <h3 class="text-xl font-bold font-headline">3. Preview & Export</h3>
+            <p class="text-on-surface-variant">
+              Listen instantly and download your MP3 audio file.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ethics Section -->
+    <section class="py-24 px-8 bg-surface-container-highest/10" id="ethics">
+      <div class="max-w-4xl mx-auto text-center space-y-8">
+        <span
+          class="inline-flex items-center gap-2 bg-on-secondary-container/10 text-on-secondary-container px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest"
+        >
+          <span class="material-symbols-outlined text-sm">verified_user</span>
+          Responsible AI Initiative
+        </span>
+        <h2 class="text-4xl font-extrabold font-headline">
+          Transparency & Consent
+        </h2>
+        <p class="text-lg text-on-surface-variant leading-relaxed">
+          At AI Based TTS System, we believe in the power of voice, but we
+          respect the privacy of the individual. Our technology includes strict
+          verification protocols for cloning services to ensure AI is used as a
+          tool for creation, not deception. Only upload voices you own or have
+          explicit written permission to use.
+        </p>
+        <div class="pt-8 flex flex-wrap justify-center gap-12 opacity-60">
+          <div
+            class="flex items-center gap-2 grayscale hover:grayscale-0 transition-all cursor-default"
+          >
+            <span class="material-symbols-outlined text-primary">security</span>
+            <span class="font-bold">SOC2 Compliant</span>
+          </div>
+          <div
+            class="flex items-center gap-2 grayscale hover:grayscale-0 transition-all cursor-default"
+          >
+            <span class="material-symbols-outlined text-secondary">lock</span>
+            <span class="font-bold">End-to-End Encryption</span>
+          </div>
+          <div
+            class="flex items-center gap-2 grayscale hover:grayscale-0 transition-all cursor-default"
+          >
+            <span class="material-symbols-outlined text-primary"
+              >history_edu</span
+            >
+            <span class="font-bold">Usage Licensing</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Banner -->
+    <section
+      class="py-20 px-8 bg-gradient-to-br from-primary to-primary-container"
+    >
+      <div class="max-w-4xl mx-auto text-center space-y-6">
+        <h2 class="text-4xl font-extrabold font-headline text-white">
+          Ready to Build Your Voice?
+        </h2>
+        <p class="text-on-primary/80 text-lg">
+          Open the studio and start generating speech in seconds.
+        </p>
+        <a href="/studio">
+          <button
+            class="bg-white text-primary px-10 py-4 rounded-xl font-bold text-lg shadow-xl hover:opacity-90 transition-all mt-4"
+          >
+            Launch Studio →
+          </button>
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-50 border-t border-slate-200/15 py-16 px-8">
+      <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div class="space-y-4">
+          <span
+            class="text-xl font-bold text-indigo-700 tracking-tight font-headline"
+            >AI Based TTS System</span
+          >
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Architecting the future of synthetic vocal performance through
+            precision and empathy.
+          </p>
+        </div>
+        <div>
+          <h4
+            class="font-bold text-sm mb-6 uppercase tracking-wider text-on-surface"
+          >
+            Studio
+          </h4>
+          <ul class="space-y-3">
+            <li>
+              <a
+                class="text-slate-500 hover:text-indigo-500 text-sm transition-all hover:underline"
+                href="/studio"
+                >Text-to-Speech</a
+              >
+            </li>
+            <li>
+              <a
+                class="text-slate-500 hover:text-indigo-500 text-sm transition-all hover:underline"
+                href="/studio#cloning"
+                >Voice Cloning</a
+              >
+            </li>
+            <li>
+              <a
+                class="text-slate-500 hover:text-indigo-500 text-sm transition-all hover:underline"
+                href="/studio#voices"
+                >Voice Library</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4
+            class="font-bold text-sm mb-6 uppercase tracking-wider text-on-surface"
+          >
+            Company
+          </h4>
+          <ul class="space-y-3">
+            <li>
+              <a
+                class="text-slate-500 hover:text-indigo-500 text-sm transition-all hover:underline"
+                href="#ethics"
+                >Ethics</a
+              >
+            </li>
+            <li>
+              <a
+                class="text-slate-500 hover:text-indigo-500 text-sm transition-all hover:underline"
+                href="#"
+                >Privacy Policy</a
+              >
+            </li>
+            <li>
+              <a
+                class="text-slate-500 hover:text-indigo-500 text-sm transition-all hover:underline"
+                href="#"
+                >Terms of Service</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4
+            class="font-bold text-sm mb-6 uppercase tracking-wider text-on-surface"
+          >
+            Newsletter
+          </h4>
+          <div class="flex gap-2">
+            <input
+              class="flex-1 bg-surface-container-low border-none rounded-lg text-sm px-4 focus:ring-1 focus:ring-primary/40"
+              placeholder="Email address"
+              type="email"
+            />
+            <button class="bg-primary text-on-primary p-2 rounded-lg">
+              <span class="material-symbols-outlined text-sm"
+                >arrow_forward</span
+              >
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        class="max-w-7xl mx-auto mt-16 pt-8 border-t border-slate-200/15 flex flex-col md:flex-row justify-between items-center gap-4"
+      >
+        <p class="text-slate-500 text-sm">
+          © 2024 AI Based TTS System. All rights reserved.
+        </p>
+        <div class="flex gap-6">
+          <span
+            class="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer transition-all"
+            >share</span
+          >
+          <span
+            class="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer transition-all"
+            >public</span
+          >
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
