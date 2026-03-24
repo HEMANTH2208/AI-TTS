@@ -94,9 +94,20 @@
         0%,
         100% {
           transform: scaleY(0.3);
+          opacity: 0.6;
         }
         50% {
           transform: scaleY(1);
+          opacity: 1;
+        }
+      }
+      @keyframes waveActive {
+        0%,
+        100% {
+          transform: scaleY(0.4);
+        }
+        50% {
+          transform: scaleY(1.2);
         }
       }
       @keyframes spin-slow {
@@ -127,6 +138,15 @@
       }
       .bar-anim {
         animation: wave 1s ease-in-out infinite;
+        transition: all 0.3s ease;
+      }
+      .bar-anim.paused {
+        animation: none;
+        transform: scaleY(0.3);
+        opacity: 0.4;
+      }
+      .bar-anim.playing {
+        animation: waveActive 0.8s ease-in-out infinite;
       }
       .bar-anim:nth-child(1) {
         animation-delay: 0s;
@@ -221,6 +241,35 @@
           opacity: 1;
           transform: translateY(0);
         }
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      .animate-slide-in {
+        animation: slideIn 0.4s ease-out forwards;
+      }
+      .reading-prompt {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+        max-width: 600px;
+        width: 90%;
+      }
+      .overlay-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 99;
+        backdrop-filter: blur(4px);
       }
     </style>
   </head>
@@ -442,14 +491,25 @@
             <div
               class="flex flex-col md:flex-row items-center gap-6 pt-6 border-t border-outline-variant/10"
             >
-              <button
-                onclick="generateTTS()"
-                id="generate-btn"
-                class="w-full md:w-auto bg-gradient-to-r from-primary to-primary-container text-on-primary px-10 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all"
-              >
-                <span class="material-symbols-outlined">bolt</span>
-                Generate Voice
-              </button>
+              <div class="flex gap-3">
+                <button
+                  onclick="generateTTS()"
+                  id="generate-btn"
+                  class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-10 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all"
+                >
+                  <span class="material-symbols-outlined">bolt</span>
+                  Generate Voice
+                </button>
+                
+                <button
+                  onclick="stopGeneration()"
+                  id="stop-btn"
+                  class="hidden bg-error text-white px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all"
+                >
+                  <span class="material-symbols-outlined">stop</span>
+                  Stop
+                </button>
+              </div>
 
               <!-- Audio Player -->
               <div
@@ -498,7 +558,7 @@
                 >
                   {% for i in range(24) %}
                   <div
-                    class="bar-anim w-1 bg-primary rounded-full"
+                    class="bar-anim paused w-1 bg-primary rounded-full"
                     style="height: {{ [8,16,24,12,20,28,10,22,18,14,26,8,20,16,24,12,18,22,8,28,14,20,16,10][i] }}px;"
                   ></div>
                   {% endfor %}
@@ -520,6 +580,26 @@
               id="status-msg"
               class="hidden rounded-xl px-4 py-3 text-sm font-medium"
             ></div>
+
+            <!-- Voice Processing Info -->
+            <div
+              id="voice-processing-info"
+              class="hidden bg-tertiary-container/20 rounded-xl p-4 border border-tertiary/30"
+            >
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-tertiary animate-pulse"
+                  >graphic_eq</span
+                >
+                <div class="flex-1">
+                  <p class="text-sm font-bold text-tertiary">
+                    Using Your Custom Voice
+                  </p>
+                  <p class="text-xs text-on-surface-variant">
+                    Applying trained voice characteristics: <span id="voice-char-info"></span>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -706,6 +786,43 @@
                   />
                 </div>
 
+                <!-- Training Quality Indicator -->
+                <div
+                  id="quality-indicator"
+                  class="hidden bg-surface-container-low rounded-xl p-4 space-y-3"
+                >
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-on-surface-variant uppercase"
+                      >Training Quality</span
+                    >
+                    <span
+                      id="quality-score"
+                      class="text-lg font-bold text-primary"
+                      >0%</span
+                    >
+                  </div>
+                  <div class="w-full bg-outline-variant/20 rounded-full h-2">
+                    <div
+                      id="quality-bar"
+                      class="h-full rounded-full bg-gradient-to-r from-error via-yellow-500 to-green-500 transition-all duration-500"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                  <div id="quality-recommendations" class="space-y-1">
+                    <!-- Recommendations will be inserted here -->
+                  </div>
+                </div>
+
+                <!-- Add More Samples Button (shown after first training) -->
+                <button
+                  id="add-sample-btn"
+                  onclick="addMoreSamples()"
+                  class="hidden w-full bg-surface-container-high text-on-surface px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-all border-2 border-primary/30"
+                >
+                  <span class="material-symbols-outlined">add_circle</span>
+                  Add More Training Samples (Improve Accuracy)
+                </button>
+
                 <!-- Ethics Notice -->
                 <div class="p-4 bg-error-container/20 rounded-xl flex gap-3">
                   <span
@@ -724,6 +841,20 @@
                       non-consensual voice deepfakes.
                     </p>
                   </div>
+                </div>
+
+                <!-- Training Tips -->
+                <div class="p-4 bg-primary/5 rounded-xl border border-primary/20">
+                  <p class="text-xs font-bold text-primary uppercase mb-2">
+                    💡 Tips for Best Results
+                  </p>
+                  <ul class="text-xs text-on-surface-variant space-y-1">
+                    <li>✓ Record in a quiet environment without background noise</li>
+                    <li>✓ Speak clearly and at a natural pace</li>
+                    <li>✓ Read all provided sample paragraphs completely</li>
+                    <li>✓ Record for at least 30 seconds (60+ recommended)</li>
+                    <li>✓ Add multiple samples for higher accuracy</li>
+                  </ul>
                 </div>
 
                 <!-- Submit Button -->
@@ -876,6 +1007,73 @@
       </div>
     </main>
 
+    <!-- Reading Prompt Modal (shown during recording) -->
+    <div id="reading-prompt-overlay" class="overlay-backdrop hidden"></div>
+    <div id="reading-prompt" class="reading-prompt hidden">
+      <div
+        class="bg-surface-container-lowest rounded-xl shadow-2xl border-2 border-primary p-8 animate-fade-in"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-3 h-3 bg-error rounded-full animate-pulse"></div>
+            <h3 class="text-xl font-bold text-primary font-headline">
+              Recording in Progress
+            </h3>
+          </div>
+          <span id="prompt-timer" class="text-lg font-bold text-error"
+            >0:00</span
+          >
+        </div>
+        <div class="space-y-4 mb-6">
+          <p class="text-sm font-bold text-on-surface-variant uppercase">
+            Please read the following paragraphs clearly:
+          </p>
+          <div
+            class="bg-surface-container-low rounded-xl p-6 space-y-4 max-h-96 overflow-y-auto"
+          >
+            <p class="text-base leading-relaxed text-on-surface">
+              The quick brown fox jumps over the lazy dog. This sentence
+              contains every letter of the alphabet and helps capture the full
+              range of your voice. Technology has transformed the way we
+              communicate and interact with the world around us. Every word you
+              speak helps train the model to understand your unique vocal
+              characteristics.
+            </p>
+            <p class="text-base leading-relaxed text-on-surface">
+              Artificial intelligence is revolutionizing industries from
+              healthcare to entertainment. Voice synthesis technology enables
+              computers to speak with natural human-like intonation and emotion.
+              The future of communication is being shaped by these innovations.
+              Machine learning algorithms analyze pitch, tone, and rhythm to
+              create authentic voice models.
+            </p>
+            <p class="text-base leading-relaxed text-on-surface">
+              Reading aloud helps train voice models to understand your unique
+              speech patterns, tone, and pronunciation. The more clearly you
+              speak, the better the resulting voice model will sound. Take your
+              time and speak naturally at a comfortable pace. Consistency in
+              volume and clarity produces the best results for voice cloning
+              accuracy.
+            </p>
+            <p class="text-base leading-relaxed text-on-surface">
+              Numbers and special characters are important too: one, two, three,
+              four, five, six, seven, eight, nine, ten. The year 2024 marks
+              significant advances in AI technology. Email addresses like
+              example@domain.com and websites like www.example.com help the
+              model learn various speech patterns and pronunciations.
+            </p>
+          </div>
+        </div>
+        <button
+          onclick="toggleRecording()"
+          class="w-full bg-error text-white px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all"
+        >
+          <span class="material-symbols-outlined">stop</span>
+          Stop Recording
+        </button>
+      </div>
+    </div>
+
     <script>
       // ─── State ───────────────────────────────────────────────────────────
       let selectedVoice = null;
@@ -890,6 +1088,9 @@
       let playbackRate = 1.0;
       let chunkQueue = [];
       let playInProgress = false;
+      let trainingText = ""; // Store what user read during recording
+      let currentModelId = null; // For adding additional samples
+      let generationAborted = false; // Flag to stop generation
 
       // ─── Tab Switching ────────────────────────────────────────────────────
       function switchTab(tab) {
@@ -974,16 +1175,35 @@
         }
 
         const btn = document.getElementById("generate-btn");
+        const stopBtn = document.getElementById("stop-btn");
         btn.disabled = true;
         btn.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> Generating...`;
+        
+        // Reset abort flag and show stop button
+        generationAborted = false;
+        stopBtn.classList.remove("hidden");
+        
         chunkQueue = [];
         playInProgress = false;
         document.getElementById("player-container").classList.add("hidden");
-        showStatus(
-          "tts",
-          "🎙️ Preparing streaming-like audio chunks...",
-          "info",
-        );
+        
+        // Check if using custom voice
+        const isCustomVoice = selectedVoice.startsWith("voice_");
+        if (isCustomVoice) {
+          showCustomVoiceInfo();
+          showStatus(
+            "tts",
+            "🎙️ Generating speech with your custom trained voice...",
+            "info",
+          );
+        } else {
+          hideCustomVoiceInfo();
+          showStatus(
+            "tts",
+            "🎙️ Preparing streaming-like audio chunks...",
+            "info",
+          );
+        }
 
         const chunks = text
           .split(/(?<=[.!?])\s+/)
@@ -991,6 +1211,12 @@
 
         try {
           for (let i = 0; i < chunks.length; i++) {
+            // Check if generation was aborted
+            if (generationAborted) {
+              showStatus("tts", "⚠️ Generation stopped by user.", "warn");
+              break;
+            }
+            
             const chunkText = chunks[i];
             const res = await fetch("/api/synthesize-chunk", {
               method: "POST",
@@ -1005,14 +1231,21 @@
             if (!data.success) {
               throw new Error(data.error || "Chunk generation failed");
             }
+            
+            // Check again after async operation
+            if (generationAborted) {
+              showStatus("tts", "⚠️ Generation stopped by user.", "warn");
+              break;
+            }
+            
             chunkQueue.push({ url: data.audio_url, text: chunkText });
-            showStatus(
-              "tts",
-              `⚡ Chunk ${i + 1}/${chunks.length} ready - playing now...`,
-              "info",
-            );
+            
+            const statusMsg = isCustomVoice
+              ? `⚡ Processing chunk ${i + 1}/${chunks.length} with your voice...`
+              : `⚡ Chunk ${i + 1}/${chunks.length} ready - playing now...`;
+            showStatus("tts", statusMsg, "info");
 
-            if (!playInProgress) {
+            if (!playInProgress && !generationAborted) {
               document
                 .getElementById("player-container")
                 .classList.remove("hidden");
@@ -1020,25 +1253,106 @@
             }
           }
 
-          showStatus(
-            "tts",
-            "✅ All chunks queued, playback in progress.",
-            "success",
-          );
-          document.getElementById("download-btn").href =
-            chunkQueue.length > 0 ? chunkQueue[chunkQueue.length - 1].url : "#";
+          if (!generationAborted) {
+            const successMsg = isCustomVoice
+              ? "✅ All chunks generated with your custom voice! Playback in progress."
+              : "✅ All chunks queued, playback in progress.";
+            showStatus("tts", successMsg, "success");
+            
+            document.getElementById("download-btn").href =
+              chunkQueue.length > 0 ? chunkQueue[chunkQueue.length - 1].url : "#";
+          }
         } catch (e) {
           showStatus("tts", `❌ ${e.message}`, "error");
+          hideCustomVoiceInfo();
         } finally {
           btn.disabled = false;
           btn.innerHTML = `<span class="material-symbols-outlined">bolt</span> Generate Voice`;
+          
+          // Hide stop button after generation completes
+          if (!playInProgress && chunkQueue.length === 0) {
+            stopBtn.classList.add("hidden");
+          }
         }
+      }
+      
+      // ─── Stop Generation ──────────────────────────────────────────────────
+      function stopGeneration() {
+        // Set abort flag
+        generationAborted = true;
+        
+        // Clear chunk queue
+        chunkQueue = [];
+        
+        // Stop audio playback
+        const audio = document.getElementById("audio-player");
+        audio.pause();
+        audio.currentTime = 0;
+        audio.src = "";
+        
+        // Reset playback state
+        playInProgress = false;
+        
+        // Reset UI elements
+        document.getElementById("play-icon").textContent = "play_arrow";
+        const bars = document.querySelectorAll("#waveform-bars .bar-anim");
+        bars.forEach((bar) => {
+          bar.classList.remove("playing");
+          bar.classList.add("paused");
+        });
+        
+        // Hide player and stop button
+        document.getElementById("player-container").classList.add("hidden");
+        document.getElementById("stop-btn").classList.add("hidden");
+        
+        // Hide custom voice info
+        hideCustomVoiceInfo();
+        
+        // Show stopped message
+        showStatus("tts", "⏹️ Voice generation stopped.", "warn");
+      }
+
+      // ─── Show/Hide Custom Voice Info ──────────────────────────────────────
+      function showCustomVoiceInfo() {
+        const info = document.getElementById("voice-processing-info");
+        const charInfo = document.getElementById("voice-char-info");
+        
+        // Get voice characteristics from localStorage
+        const userVoices = JSON.parse(
+          localStorage.getItem("userVoices") || "{}",
+        );
+        const voice = userVoices[selectedVoice];
+        
+        if (voice) {
+          const chars = [];
+          if (voice.qualityScore) chars.push(`${voice.qualityScore}% accuracy`);
+          charInfo.textContent = chars.join(", ") || "Processing...";
+        }
+        
+        info.classList.remove("hidden");
+        info.classList.add("animate-fade-in");
+      }
+
+      function hideCustomVoiceInfo() {
+        const info = document.getElementById("voice-processing-info");
+        info.classList.add("hidden");
       }
 
       function playNextChunk() {
-        if (chunkQueue.length === 0) {
+        // Check if generation was aborted
+        if (generationAborted || chunkQueue.length === 0) {
           playInProgress = false;
           document.getElementById("play-icon").textContent = "play_arrow";
+          const bars = document.querySelectorAll("#waveform-bars .bar-anim");
+          bars.forEach((bar) => {
+            bar.classList.remove("playing");
+            bar.classList.add("paused");
+          });
+          
+          // Hide stop button when playback is complete
+          setTimeout(() => {
+            document.getElementById("stop-btn").classList.add("hidden");
+          }, 1000);
           return;
         }
 
@@ -1047,8 +1361,20 @@
         const audio = document.getElementById("audio-player");
         audio.src = chunk.url;
         audio.playbackRate = playbackRate;
-        audio.onended = () => setTimeout(playNextChunk, 80);
+        audio.onended = () => {
+          if (!generationAborted) {
+            setTimeout(playNextChunk, 80);
+          }
+        };
         document.getElementById("play-icon").textContent = "pause";
+        
+        // Animate waveform bars
+        const bars = document.querySelectorAll("#waveform-bars .bar-anim");
+        bars.forEach((bar) => {
+          bar.classList.remove("paused");
+          bar.classList.add("playing");
+        });
+        
         audio.play().catch(() => {});
       }
 
@@ -1080,21 +1406,44 @@
       function togglePlay() {
         const audio = document.getElementById("audio-player");
         const icon = document.getElementById("play-icon");
-        const bars = document.querySelectorAll("#waveform .bar");
+        const bars = document.querySelectorAll("#waveform-bars .bar-anim");
+        
         if (audio.paused) {
-          audio.play();
-          icon.textContent = "pause";
-          bars.forEach((bar) => bar.classList.add("bar-anim"));
+          // Resume playback
+          if (chunkQueue.length > 0 && !playInProgress) {
+            playNextChunk();
+          } else {
+            audio.play();
+            icon.textContent = "pause";
+            bars.forEach((bar) => {
+              bar.classList.remove("paused");
+              bar.classList.add("playing");
+            });
+          }
         } else {
           audio.pause();
           icon.textContent = "play_arrow";
-          bars.forEach((bar) => bar.classList.remove("bar-anim"));
+          bars.forEach((bar) => {
+            bar.classList.remove("playing");
+            bar.classList.add("paused");
+          });
         }
       }
+      
       function onAudioEnded() {
         document.getElementById("play-icon").textContent = "play_arrow";
-        const bars = document.querySelectorAll("#waveform .bar");
-        bars.forEach((bar) => bar.classList.remove("bar-anim"));
+        const bars = document.querySelectorAll("#waveform-bars .bar-anim");
+        bars.forEach((bar) => {
+          bar.classList.remove("playing");
+          bar.classList.add("paused");
+        });
+        
+        // Hide stop button when all playback is complete
+        if (chunkQueue.length === 0 && !playInProgress) {
+          setTimeout(() => {
+            document.getElementById("stop-btn").classList.add("hidden");
+          }, 500);
+        }
       }
 
       // ─── Status Messages ──────────────────────────────────────────────────
@@ -1155,13 +1504,34 @@
                 .getElementById("recording-preview")
                 .classList.remove("hidden");
               stream.getTracks().forEach((t) => t.stop());
+              
+              // Hide reading prompt
+              document.getElementById("reading-prompt").classList.add("hidden");
+              document
+                .getElementById("reading-prompt-overlay")
+                .classList.add("hidden");
+              
+              // Store training text
+              trainingText = document.querySelector(
+                "#reading-prompt .bg-surface-container-low",
+              ).textContent;
+              
+              // If we have a current model, offer to add as additional sample
+              if (currentModelId && recordSeconds >= 10) {
+                showStatus(
+                  "train",
+                  "✅ Recording complete! This will be added as an additional training sample.",
+                  "success",
+                );
+                setTimeout(() => submitAdditionalSample(), 1000);
+              }
             };
             mediaRecorder.start();
             isRecording = true;
             recordSeconds = 0;
             showStatus(
               "train",
-              "🎤 Recording started! Speak clearly for best results.",
+              "🎤 Recording started! Read the sample paragraphs clearly for best results.",
               "info",
             );
             document.getElementById("record-icon").textContent = "stop";
@@ -1174,12 +1544,22 @@
             document
               .getElementById("recording-preview")
               .classList.add("hidden");
+            
+            // Show reading prompt modal
+            document
+              .getElementById("reading-prompt")
+              .classList.remove("hidden");
+            document
+              .getElementById("reading-prompt-overlay")
+              .classList.remove("hidden");
+            
             recordTimer = setInterval(() => {
               recordSeconds++;
               const m = Math.floor(recordSeconds / 60);
               const s = recordSeconds % 60;
-              document.getElementById("record-timer").textContent =
-                `${m}:${s.toString().padStart(2, "0")}`;
+              const timeStr = `${m}:${s.toString().padStart(2, "0")}`;
+              document.getElementById("record-timer").textContent = timeStr;
+              document.getElementById("prompt-timer").textContent = timeStr;
             }, 1000);
           } catch (e) {
             showStatus(
@@ -1226,80 +1606,283 @@
           return;
         }
 
+        const voiceName =
+          document.getElementById("voice-name").value.trim() || "Custom Voice";
+
+        // Validate recording duration
+        if (recordSeconds < 10 && recordedBlob) {
+          showStatus(
+            "train",
+            "⚠️ Recording too short. Please record at least 10 seconds for better accuracy.",
+            "warn",
+          );
+          return;
+        }
+
         const btn = document.getElementById("train-btn");
         btn.disabled = true;
-        btn.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> Submitting...`;
+        btn.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> Training Voice Model...`;
         showStatus(
           "train",
-          "⏳ Uploading sample to training pipeline...",
+          "🧠 Analyzing voice characteristics and training model...",
           "info",
         );
 
         const formData = new FormData();
         formData.append("audio", file, file.name || "recording.webm");
+        formData.append("voice_name", voiceName);
+        formData.append("training_text", trainingText);
+        formData.append("duration", recordSeconds || 0);
 
         try {
           const res = await fetch("/api/upload-clone", {
             method: "POST",
             body: formData,
           });
+          
+          // Check if response is ok
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({ error: `Server error: ${res.status}` }));
+            throw new Error(errorData.error || `Server returned ${res.status}`);
+          }
+          
           const data = await res.json();
+          
           if (data.success) {
-            showStatus("train", `✅ ${data.message}`, "success");
+            // Show quality score
+            displayQualityScore(
+              data.quality_score,
+              data.recommendations,
+              data.duration,
+            );
+            
+            showStatus(
+              "train",
+              `✅ Voice model trained with ${data.quality_score}% accuracy! "${voiceName}" is ready to use.`,
+              "success",
+            );
+            
             // Add to user trained voices
-            const voiceName =
-              document.getElementById("voice-name").value.trim() ||
-              "Custom Voice";
-            addUserVoice(voiceName);
+            addUserVoice(voiceName, data.model_id, data.quality_score);
+            currentModelId = data.model_id; // Store for adding more samples
+            
+            // Show add more samples button if quality can be improved
+            if (data.quality_score < 90) {
+              document.getElementById("add-sample-btn").classList.remove("hidden");
+            }
+            
             document.getElementById("voice-name").value = ""; // Clear input
+            clearFile();
+            clearRecording();
+            recordSeconds = 0;
+            
+            // Show success animation
+            setTimeout(() => {
+              showStatus(
+                "train",
+                `🎉 You can now use "${voiceName}" in the Text-to-Speech tab!`,
+                "success",
+              );
+            }, 2000);
           } else {
-            showStatus("train", `❌ ${data.error}`, "error");
+            showStatus("train", `❌ ${data.error || 'Training failed'}`, "error");
           }
         } catch (e) {
-          showStatus("train", `❌ Upload failed: ${e.message}`, "error");
+          console.error("Training error:", e);
+          showStatus("train", `❌ Training failed: ${e.message}`, "error");
         } finally {
           btn.disabled = false;
           btn.innerHTML = `<span class="material-symbols-outlined">model_training</span> Submit Voice for Training`;
         }
       }
 
+      // ─── Display Quality Score ────────────────────────────────────────────
+      function displayQualityScore(score, recommendations, duration) {
+        const indicator = document.getElementById("quality-indicator");
+        const scoreEl = document.getElementById("quality-score");
+        const barEl = document.getElementById("quality-bar");
+        const recsEl = document.getElementById("quality-recommendations");
+
+        indicator.classList.remove("hidden");
+        scoreEl.textContent = `${score}%`;
+        barEl.style.width = `${score}%`;
+
+        // Display recommendations
+        recsEl.innerHTML = "";
+        if (recommendations && recommendations.length > 0) {
+          recommendations.forEach((rec) => {
+            const recDiv = document.createElement("div");
+            recDiv.className =
+              "text-xs text-on-surface-variant flex items-start gap-2";
+            recDiv.innerHTML = `<span class="text-primary">→</span><span>${rec}</span>`;
+            recsEl.appendChild(recDiv);
+          });
+        }
+
+        // Add duration info
+        const durationDiv = document.createElement("div");
+        durationDiv.className =
+          "text-xs text-on-surface-variant flex items-start gap-2 pt-2 border-t border-outline-variant/20";
+        durationDiv.innerHTML = `<span class="material-symbols-outlined text-sm">schedule</span><span>Recording duration: ${Math.floor(duration)}s</span>`;
+        recsEl.appendChild(durationDiv);
+      }
+
+      // ─── Add More Training Samples ────────────────────────────────────────
+      async function addMoreSamples() {
+        if (!currentModelId) {
+          showStatus(
+            "train",
+            "⚠️ Please train a voice model first.",
+            "warn",
+          );
+          return;
+        }
+
+        showStatus(
+          "train",
+          "📝 Record another sample to improve your voice model accuracy.",
+          "info",
+        );
+
+        // Scroll to recording section
+        document.getElementById("record-btn").scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+
+      // ─── Submit Additional Training Sample ────────────────────────────────
+      async function submitAdditionalSample() {
+        if (!currentModelId || !recordedBlob) return;
+
+        const formData = new FormData();
+        formData.append("audio", new File([recordedBlob], "sample.webm"));
+        formData.append("model_id", currentModelId);
+        formData.append("training_text", trainingText);
+        formData.append("duration", recordSeconds);
+
+        try {
+          const res = await fetch("/api/add-training-sample", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            displayQualityScore(data.quality_score, [], data.total_duration);
+            showStatus(
+              "train",
+              `✅ ${data.message} (Sample ${data.sample_count})`,
+              "success",
+            );
+
+            // Update the voice card quality
+            updateVoiceQuality(currentModelId, data.quality_score);
+
+            clearRecording();
+            recordSeconds = 0;
+          }
+        } catch (e) {
+          showStatus("train", `❌ Failed to add sample: ${e.message}`, "error");
+        }
+      }
+
       // ─── Add user trained voice to the grid ──────────────────────────────
-      function addUserVoice(name) {
+      function addUserVoice(name, modelId, qualityScore = 0) {
         const userVoicesSection = document.getElementById(
           "user-voices-section",
         );
         const userVoicesGrid = document.getElementById("user-voices");
-        const key = `user-${Date.now()}`; // Unique key
+
+        // Check if voice already exists
+        const existing = document.querySelector(
+          `.voice-card[data-key="${modelId}"]`,
+        );
+        if (existing) {
+          updateVoiceQuality(modelId, qualityScore);
+          return;
+        }
 
         const voiceCard = document.createElement("div");
         voiceCard.className =
-          "voice-card border-2 border-outline-variant/20 rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-all hover-lift";
-        voiceCard.setAttribute("data-key", key);
-        voiceCard.onclick = () => selectVoice(key, voiceCard);
+          "voice-card border-2 border-outline-variant/20 rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-all hover-lift animate-slide-in";
+        voiceCard.setAttribute("data-key", modelId);
+        voiceCard.onclick = () => selectVoice(modelId, voiceCard);
+
+        const qualityColor =
+          qualityScore >= 90
+            ? "text-green-600"
+            : qualityScore >= 70
+              ? "text-yellow-600"
+              : "text-orange-600";
 
         voiceCard.innerHTML = `
           <div class="flex items-center gap-2 mb-1">
-            <span class="material-symbols-outlined text-sm text-primary">person</span>
+            <span class="material-symbols-outlined text-sm text-tertiary">person</span>
             <span class="font-bold text-sm text-on-surface">${name}</span>
           </div>
-          <p class="text-xs text-on-surface-variant leading-tight">User trained voice</p>
-          <div class="mt-2 flex items-center gap-1">
-            <span class="text-xs bg-surface-container px-2 py-0.5 rounded-full font-medium text-on-surface-variant">EN</span>
+          <p class="text-xs text-on-surface-variant leading-tight">Your custom trained voice</p>
+          <div class="mt-2 flex items-center justify-between gap-1">
+            <span class="text-xs bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded-full font-medium">CUSTOM</span>
+            <span class="text-xs font-bold ${qualityColor}" data-quality="${modelId}">${qualityScore}% accuracy</span>
           </div>
         `;
 
         userVoicesGrid.appendChild(voiceCard);
-        userVoicesSection.style.display = "block"; // Show the section
+        userVoicesSection.style.display = "block";
         userVoicesSection.classList.add("fade-in-up");
 
-        // Add to voices object for selection
-        voices[key] = {
+        // Store in localStorage
+        const userVoices = JSON.parse(
+          localStorage.getItem("userVoices") || "{}",
+        );
+        userVoices[modelId] = {
           name: name,
-          desc: "User trained voice",
+          desc: "Your custom trained voice",
           lang: "en",
-          gender: "neutral",
+          gender: "custom",
+          modelId: modelId,
+          qualityScore: qualityScore,
         };
+        localStorage.setItem("userVoices", JSON.stringify(userVoices));
       }
+
+      // ─── Update Voice Quality Display ─────────────────────────────────────
+      function updateVoiceQuality(modelId, qualityScore) {
+        const qualityEl = document.querySelector(`[data-quality="${modelId}"]`);
+        if (qualityEl) {
+          qualityEl.textContent = `${qualityScore}% accuracy`;
+          const qualityColor =
+            qualityScore >= 90
+              ? "text-green-600"
+              : qualityScore >= 70
+                ? "text-yellow-600"
+                : "text-orange-600";
+          qualityEl.className = `text-xs font-bold ${qualityColor}`;
+        }
+
+        // Update localStorage
+        const userVoices = JSON.parse(
+          localStorage.getItem("userVoices") || "{}",
+        );
+        if (userVoices[modelId]) {
+          userVoices[modelId].qualityScore = qualityScore;
+          localStorage.setItem("userVoices", JSON.stringify(userVoices));
+        }
+      }
+
+      // ─── Load user voices on page load ────────────────────────────────────
+      function loadUserVoices() {
+        const userVoices = JSON.parse(
+          localStorage.getItem("userVoices") || "{}",
+        );
+        Object.entries(userVoices).forEach(([key, voice]) => {
+          addUserVoice(voice.name, key, voice.qualityScore || 0);
+        });
+      }
+
+      // Load user voices when page loads
+      window.addEventListener("DOMContentLoaded", loadUserVoices);
 
       // ─── Navigate to TTS with voice preselected ───────────────────────────
       function goToVoice(key) {
