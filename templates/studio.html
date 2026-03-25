@@ -136,17 +136,28 @@
           width: 100%;
         }
       }
+      /* Waveform bars are animated from JavaScript (WebAudio analyser). */
       .bar-anim {
-        animation: wave 1s ease-in-out infinite;
-        transition: all 0.3s ease;
+        animation: none;
+        transform-origin: bottom;
+        transition:
+          height 0.08s ease,
+          opacity 0.2s ease;
+        opacity: 0.55;
       }
       .bar-anim.paused {
-        animation: none;
-        transform: scaleY(0.3);
-        opacity: 0.4;
+        opacity: 0.35;
       }
       .bar-anim.playing {
-        animation: waveActive 0.8s ease-in-out infinite;
+        opacity: 1;
+      }
+
+      /* Recording visualizer bars keep a lightweight loop animation. */
+      .record-bar {
+        animation: wave 1s ease-in-out infinite;
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s ease;
       }
       .bar-anim:nth-child(1) {
         animation-delay: 0s;
@@ -485,6 +496,33 @@
                   MP3 (Google TTS)
                 </div>
               </div>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <label
+                    class="text-xs font-bold text-on-surface-variant uppercase tracking-wider"
+                    >Streaming</label
+                  >
+                  <span id="stream-label" class="text-xs font-bold text-primary"
+                    >Word-by-word</span
+                  >
+                </div>
+                <div class="flex gap-2">
+                  <button
+                    onclick="setStreamMode('word')"
+                    id="btn-stream-word"
+                    class="flex-1 py-2 rounded-xl text-xs font-bold bg-primary text-white transition-all"
+                  >
+                    Word
+                  </button>
+                  <button
+                    onclick="setStreamMode('sentence')"
+                    id="btn-stream-sentence"
+                    class="flex-1 py-2 rounded-xl text-xs font-bold bg-surface-container text-on-surface-variant transition-all"
+                  >
+                    Sentence
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- Generate Button & Player -->
@@ -606,9 +644,9 @@
 
       <!-- ======================== VOICE STUDIO PANEL ======================== -->
       <div id="panel-clone" class="hidden animate-fade-in" id="cloning">
-        <div class="grid lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <!-- Left: Upload / Record -->
-          <div class="space-y-6">
+          <div class="lg:col-span-7 space-y-6">
             <div
               class="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/15 overflow-hidden"
             >
@@ -737,7 +775,7 @@
                     <div class="flex items-center gap-[2px] h-8">
                       {% for i in range(20) %}
                       <div
-                        class="bar-anim w-1 bg-error/60 rounded-full"
+                        class="record-bar w-1 bg-error/60 rounded-full"
                         style="height:{{ [6,14,20,10,18,24,8,18,14,12,22,6,16,12,20,10,16,18,6,24][i] }}px;"
                       ></div>
                       {% endfor %}
@@ -871,12 +909,47 @@
                   id="train-status"
                   class="hidden rounded-xl px-4 py-3 text-sm font-medium"
                 ></div>
+
+                <!-- Latest Trained Voice Preview -->
+                <div
+                  id="trained-voice-preview"
+                  class="hidden bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 space-y-3"
+                >
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <p
+                        class="text-xs font-bold text-primary uppercase tracking-widest"
+                      >
+                        Latest Trained Voice
+                      </p>
+                      <p
+                        id="trained-voice-name"
+                        class="text-lg font-extrabold text-on-surface mt-1"
+                      >
+                        —
+                      </p>
+                      <p
+                        id="trained-voice-meta"
+                        class="text-xs text-on-surface-variant mt-1"
+                      >
+                        —
+                      </p>
+                    </div>
+                    <button
+                      id="use-trained-voice-btn"
+                      onclick="useTrainedVoiceInTTS()"
+                      class="bg-primary text-white px-4 py-2 rounded-xl font-bold text-sm hover:opacity-90 transition-all"
+                    >
+                      Use in TTS
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Quick Training Samples + Visuals -->
-          <div class="space-y-4">
+          <div class="lg:col-span-5 space-y-6">
             <div
               class="bg-surface-container-lowest rounded-xl shadow-md border border-outline-variant/15 p-6 animate-fade-in"
             >
@@ -905,10 +978,7 @@
                 ></div>
               </div>
             </div>
-          </div>
-
-          <!-- Right: Predefined Voice Library + Info -->
-          <div class="space-y-6">
+          
             <div
               class="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/15 p-8"
             >
@@ -960,7 +1030,32 @@
               </div>
             </div>
 
-            <!-- Feature Highlights -->
+          <!-- Your Trained Voices (Local) -->
+          <div
+            class="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/15 p-8 space-y-4"
+          >
+            <div class="space-y-1">
+              <span class="text-secondary font-bold tracking-widest text-sm uppercase"
+                >Your Trained Voices</span
+              >
+              <h2 class="text-2xl font-extrabold font-headline">
+                Local Custom Models
+              </h2>
+              <p class="text-on-surface-variant text-sm leading-relaxed">
+                Select any trained voice to use it instantly in the TTS tab.
+              </p>
+            </div>
+            <div id="clone-user-voices" class="space-y-3">
+              <div
+                id="clone-user-voices-empty"
+                class="text-xs text-on-surface-variant"
+              >
+                No trained voices yet. Train one on the left.
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature Highlights -->
             <div
               class="bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-8 space-y-4"
             >
@@ -1090,7 +1185,19 @@
       let playInProgress = false;
       let trainingText = ""; // Store what user read during recording
       let currentModelId = null; // For adding additional samples
+      let lastTrainedModelId = null; // For quick selection in TTS tab
       let generationAborted = false; // Flag to stop generation
+      let streamMode = "word"; // "word" | "sentence"
+
+      // Waveform sync for TTS playback (driven by WebAudio analyser).
+      let audioCtx = null;
+      let analyserNode = null;
+      let analyserData = null;
+      let mediaSourceNode = null;
+      let outputGainNode = null;
+      let waveformRAF = null;
+      let waveformBaseHeights = [];
+      let waveformEnabled = false;
 
       // ─── Tab Switching ────────────────────────────────────────────────────
       function switchTab(tab) {
@@ -1143,6 +1250,18 @@
           : "Normal";
       }
 
+      function setStreamMode(mode) {
+        streamMode = mode;
+        const isWord = mode === "word";
+        document.getElementById("btn-stream-word").className =
+          `flex-1 py-2 rounded-xl text-xs font-bold transition-all ${isWord ? "bg-primary text-white" : "bg-surface-container text-on-surface-variant"}`;
+        document.getElementById("btn-stream-sentence").className =
+          `flex-1 py-2 rounded-xl text-xs font-bold transition-all ${!isWord ? "bg-primary text-white" : "bg-surface-container text-on-surface-variant"}`;
+        document.getElementById("stream-label").textContent = isWord
+          ? "Word-by-word"
+          : "Sentence";
+      }
+
       function bindRateControls() {
         document.getElementById("rate-1x").onclick = () => setPlaybackRate(1);
         document.getElementById("rate-1_5x").onclick = () =>
@@ -1152,6 +1271,7 @@
 
       bindRateControls();
       setPlaybackRate(1);
+      setStreamMode("word");
 
       // ─── Char Count ───────────────────────────────────────────────────────
       function updateCharCount() {
@@ -1187,8 +1307,11 @@
         playInProgress = false;
         document.getElementById("player-container").classList.add("hidden");
         
-        // Check if using custom voice
-        const isCustomVoice = selectedVoice.startsWith("voice_");
+        // Check if using custom voice (custom voices are stored in localStorage)
+        const userVoices = JSON.parse(
+          localStorage.getItem("userVoices") || "{}",
+        );
+        const isCustomVoice = !!userVoices[selectedVoice];
         if (isCustomVoice) {
           showCustomVoiceInfo();
           showStatus(
@@ -1205,9 +1328,41 @@
           );
         }
 
-        const chunks = text
-          .split(/(?<=[.!?])\s+/)
-          .filter((item) => item.trim().length > 0);
+        function chunkTextForStreaming(input) {
+          const cleaned = input.trim();
+          if (!cleaned) return [];
+
+          if (streamMode === "sentence") {
+            return cleaned
+              .split(/(?<=[.!?])\s+/)
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0);
+          }
+
+          // Word-by-word micro-chunks. To keep synthesis stable and fast, we group
+          // very short tokens and attach punctuation to the preceding word.
+          const tokens = cleaned.match(/[^\s]+/g) || [];
+          const out = [];
+          let buf = [];
+
+          const flush = () => {
+            if (buf.length === 0) return;
+            out.push(buf.join(" ").trim());
+            buf = [];
+          };
+
+          for (const t of tokens) {
+            buf.push(t);
+
+            // End chunk at punctuation or every 2 words (micro-stream).
+            const ends = /[.!?,;:]+$/.test(t);
+            if (ends || buf.length >= 2) flush();
+          }
+          flush();
+          return out;
+        }
+
+        const chunks = chunkTextForStreaming(text);
 
         try {
           for (let i = 0; i < chunks.length; i++) {
@@ -1241,7 +1396,7 @@
             chunkQueue.push({ url: data.audio_url, text: chunkText });
             
             const statusMsg = isCustomVoice
-              ? `⚡ Processing chunk ${i + 1}/${chunks.length} with your voice...`
+              ? `⚡ Processing chunk ${i + 1}/${chunks.length} with "${data.voice_name || "your voice"}"...`
               : `⚡ Chunk ${i + 1}/${chunks.length} ready - playing now...`;
             showStatus("tts", statusMsg, "info");
 
@@ -1289,6 +1444,7 @@
         audio.pause();
         audio.currentTime = 0;
         audio.src = "";
+        stopWaveformAnimation();
         
         // Reset playback state
         playInProgress = false;
@@ -1326,7 +1482,13 @@
         if (voice) {
           const chars = [];
           if (voice.qualityScore) chars.push(`${voice.qualityScore}% accuracy`);
-          charInfo.textContent = chars.join(", ") || "Processing...";
+          const characteristics = voice.characteristics || {};
+          if (characteristics.pitch)
+            chars.push(`${characteristics.pitch} pitch`);
+          if (characteristics.speed) chars.push(`${characteristics.speed} speed`);
+          if (characteristics.tone) chars.push(`${characteristics.tone} tone`);
+          charInfo.textContent =
+            chars.join(", ") || "Analyzing your voice characteristics...";
         }
         
         info.classList.remove("hidden");
@@ -1338,11 +1500,100 @@
         info.classList.add("hidden");
       }
 
+      // ─── Waveform Animation (sync with audio) ─────────────────────────
+      function initWaveformBars() {
+        const bars = document.querySelectorAll(
+          "#waveform-bars .bar-anim"
+        );
+        waveformBaseHeights = Array.from(bars).map((b) => {
+          const h = parseInt(b.style.height || "0", 10);
+          return Number.isFinite(h) && h > 0 ? h : 10;
+        });
+      }
+
+      function enableWaveformSync() {
+        if (waveformEnabled) return;
+        const audio = document.getElementById("audio-player");
+        if (!audio) return;
+
+        initWaveformBars();
+
+        const AudioContextCtor =
+          window.AudioContext || window.webkitAudioContext;
+        audioCtx = audioCtx || new AudioContextCtor();
+
+        analyserNode = audioCtx.createAnalyser();
+        analyserNode.fftSize = 256;
+        analyserData = new Uint8Array(analyserNode.frequencyBinCount);
+
+        // IMPORTANT:
+        // After createMediaElementSource(), many browsers make the element audible
+        // only through the AudioContext graph. So we must route to destination
+        // with normal gain (NOT silent), and use the analyser in the chain.
+        mediaSourceNode = audioCtx.createMediaElementSource(audio);
+        outputGainNode = audioCtx.createGain();
+        outputGainNode.gain.value = 1.0;
+
+        mediaSourceNode.connect(analyserNode);
+        analyserNode.connect(outputGainNode);
+        outputGainNode.connect(audioCtx.destination);
+
+        // Keep element settings sane (some browsers still reflect these)
+        audio.muted = false;
+        audio.volume = 1.0;
+        waveformEnabled = true;
+      }
+
+      function startWaveformAnimation() {
+        if (!analyserNode || !analyserData) return;
+        stopWaveformAnimation();
+
+        const bars = document.querySelectorAll("#waveform-bars .bar-anim");
+        const binsPerBar = analyserData.length / Math.max(1, bars.length);
+
+        const tick = () => {
+          if (!analyserNode || !analyserData) return;
+
+          analyserNode.getByteFrequencyData(analyserData);
+          for (let i = 0; i < bars.length; i++) {
+            const start = Math.floor(i * binsPerBar);
+            const end = Math.min(analyserData.length, Math.floor((i + 1) * binsPerBar));
+
+            let sum = 0;
+            for (let j = start; j < end; j++) sum += analyserData[j];
+            const count = Math.max(1, end - start);
+            const avg = sum / count; // 0..255
+
+            const base = waveformBaseHeights[i] || 10;
+            const minH = Math.max(4, base * 0.25);
+            const maxH = base * 1.8;
+            const h = minH + (avg / 255) * (maxH - minH);
+            bars[i].style.height = `${h}px`;
+          }
+
+          waveformRAF = requestAnimationFrame(tick);
+        };
+
+        waveformRAF = requestAnimationFrame(tick);
+      }
+
+      function stopWaveformAnimation() {
+        if (waveformRAF) cancelAnimationFrame(waveformRAF);
+        waveformRAF = null;
+
+        const bars = document.querySelectorAll("#waveform-bars .bar-anim");
+        for (let i = 0; i < bars.length; i++) {
+          const base = waveformBaseHeights[i] || 10;
+          bars[i].style.height = `${Math.max(4, base * 0.25)}px`;
+        }
+      }
+
       function playNextChunk() {
         // Check if generation was aborted
         if (generationAborted || chunkQueue.length === 0) {
           playInProgress = false;
           document.getElementById("play-icon").textContent = "play_arrow";
+          stopWaveformAnimation();
           const bars = document.querySelectorAll("#waveform-bars .bar-anim");
           bars.forEach((bar) => {
             bar.classList.remove("playing");
@@ -1368,14 +1619,20 @@
         };
         document.getElementById("play-icon").textContent = "pause";
         
-        // Animate waveform bars
+        // Animate waveform bars (HTML classes + synced height update)
         const bars = document.querySelectorAll("#waveform-bars .bar-anim");
         bars.forEach((bar) => {
           bar.classList.remove("paused");
           bar.classList.add("playing");
         });
-        
-        audio.play().catch(() => {});
+
+        enableWaveformSync();
+        if (audioCtx && audioCtx.state === "suspended") {
+          audioCtx.resume().catch(() => {});
+        }
+        audio.play()
+          .then(() => startWaveformAnimation())
+          .catch(() => {});
       }
 
       function setPlaybackRate(rate) {
@@ -1413,7 +1670,13 @@
           if (chunkQueue.length > 0 && !playInProgress) {
             playNextChunk();
           } else {
-            audio.play();
+            enableWaveformSync();
+            if (audioCtx && audioCtx.state === "suspended") {
+              audioCtx.resume().catch(() => {});
+            }
+            audio.play()
+              .then(() => startWaveformAnimation())
+              .catch(() => {});
             icon.textContent = "pause";
             bars.forEach((bar) => {
               bar.classList.remove("paused");
@@ -1422,6 +1685,7 @@
           }
         } else {
           audio.pause();
+          stopWaveformAnimation();
           icon.textContent = "play_arrow";
           bars.forEach((bar) => {
             bar.classList.remove("playing");
@@ -1431,6 +1695,9 @@
       }
       
       function onAudioEnded() {
+        // If we still have queued chunks, let `playNextChunk()` update UI.
+        if (!generationAborted && chunkQueue.length > 0) return;
+
         document.getElementById("play-icon").textContent = "play_arrow";
         const bars = document.querySelectorAll("#waveform-bars .bar-anim");
         bars.forEach((bar) => {
@@ -1663,8 +1930,30 @@
             );
             
             // Add to user trained voices
-            addUserVoice(voiceName, data.model_id, data.quality_score);
+            addUserVoice(
+              voiceName,
+              data.model_id,
+              data.quality_score,
+              data.characteristics || {}
+            );
             currentModelId = data.model_id; // Store for adding more samples
+            lastTrainedModelId = data.model_id;
+
+            const preview = document.getElementById(
+              "trained-voice-preview"
+            );
+            const nameEl = document.getElementById("trained-voice-name");
+            const metaEl = document.getElementById("trained-voice-meta");
+            const c = data.characteristics || {};
+            const metaLine = `Pitch: ${c.pitch || "medium"}, Speed: ${c.speed || "normal"}, Tone: ${c.tone || "neutral"}`;
+            if (preview && nameEl && metaEl) {
+              nameEl.textContent = voiceName;
+              metaEl.textContent = metaLine;
+              preview.classList.remove("hidden");
+              preview.classList.add("animate-slide-in");
+            }
+
+            loadCloneUserVoices();
             
             // Show add more samples button if quality can be improved
             if (data.quality_score < 90) {
@@ -1788,7 +2077,12 @@
       }
 
       // ─── Add user trained voice to the grid ──────────────────────────────
-      function addUserVoice(name, modelId, qualityScore = 0) {
+      function addUserVoice(
+        name,
+        modelId,
+        qualityScore = 0,
+        characteristics = {},
+      ) {
         const userVoicesSection = document.getElementById(
           "user-voices-section",
         );
@@ -1800,12 +2094,36 @@
         );
         if (existing) {
           updateVoiceQuality(modelId, qualityScore);
+
+          // Keep UI + localStorage in sync on repeated training uploads.
+          const pitch = characteristics.pitch || existing.dataset.pitch || "medium";
+          const speed = characteristics.speed || existing.dataset.speed || "normal";
+          const tone = characteristics.tone || existing.dataset.tone || "neutral";
+          existing.dataset.pitch = pitch;
+          existing.dataset.speed = speed;
+          existing.dataset.tone = tone;
+
+          const descEl = existing.querySelector(
+            "p.text-xs.text-on-surface-variant.leading-tight"
+          );
+          if (descEl) {
+            descEl.textContent = `Pitch: ${pitch}, Speed: ${speed}, Tone: ${tone}`;
+          }
+
+          const userVoices = JSON.parse(
+            localStorage.getItem("userVoices") || "{}",
+          );
+          if (userVoices[modelId]) {
+            userVoices[modelId].characteristics = { pitch, speed, tone };
+            userVoices[modelId].qualityScore = qualityScore;
+            localStorage.setItem("userVoices", JSON.stringify(userVoices));
+          }
           return;
         }
 
         const voiceCard = document.createElement("div");
         voiceCard.className =
-          "voice-card border-2 border-outline-variant/20 rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-all hover-lift animate-slide-in";
+          "voice-card border-2 border-outline-variant/20 rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-all hover-lift animate-slide-in relative";
         voiceCard.setAttribute("data-key", modelId);
         voiceCard.onclick = () => selectVoice(modelId, voiceCard);
 
@@ -1816,12 +2134,24 @@
               ? "text-yellow-600"
               : "text-orange-600";
 
+        const pitch = characteristics.pitch || "medium";
+        const speed = characteristics.speed || "normal";
+        const tone = characteristics.tone || "neutral";
+        const metaLine = `Pitch: ${pitch}, Speed: ${speed}, Tone: ${tone}`;
+
         voiceCard.innerHTML = `
+          <button
+            class="absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-container hover:bg-error-container text-on-surface-variant hover:text-error flex items-center justify-center transition-all"
+            title="Delete voice"
+            onclick="event.stopPropagation(); deleteCustomVoice('${modelId}')"
+          >
+            <span class="material-symbols-outlined text-sm">delete</span>
+          </button>
           <div class="flex items-center gap-2 mb-1">
             <span class="material-symbols-outlined text-sm text-tertiary">person</span>
             <span class="font-bold text-sm text-on-surface">${name}</span>
           </div>
-          <p class="text-xs text-on-surface-variant leading-tight">Your custom trained voice</p>
+          <p class="text-xs text-on-surface-variant leading-tight">${metaLine}</p>
           <div class="mt-2 flex items-center justify-between gap-1">
             <span class="text-xs bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded-full font-medium">CUSTOM</span>
             <span class="text-xs font-bold ${qualityColor}" data-quality="${modelId}">${qualityScore}% accuracy</span>
@@ -1843,6 +2173,7 @@
           gender: "custom",
           modelId: modelId,
           qualityScore: qualityScore,
+          characteristics: { pitch, speed, tone },
         };
         localStorage.setItem("userVoices", JSON.stringify(userVoices));
       }
@@ -1877,12 +2208,134 @@
           localStorage.getItem("userVoices") || "{}",
         );
         Object.entries(userVoices).forEach(([key, voice]) => {
-          addUserVoice(voice.name, key, voice.qualityScore || 0);
+          addUserVoice(
+            voice.name,
+            key,
+            voice.qualityScore || 0,
+            voice.characteristics || {}
+          );
         });
+      }
+
+      function loadCloneUserVoices() {
+        const emptyEl = document.getElementById(
+          "clone-user-voices-empty"
+        );
+        const container = document.getElementById("clone-user-voices");
+        if (!container) return;
+
+        const userVoices = JSON.parse(
+          localStorage.getItem("userVoices") || "{}",
+        );
+        const entries = Object.entries(userVoices);
+
+        // Reset container content (keep empty placeholder as a child).
+        const existingCards = container.querySelectorAll(".clone-voice-card");
+        existingCards.forEach((c) => c.remove());
+
+        if (entries.length === 0) {
+          if (emptyEl) emptyEl.classList.remove("hidden");
+          return;
+        }
+        if (emptyEl) emptyEl.classList.add("hidden");
+
+        entries.forEach(([modelId, voice]) => {
+          const characteristics = voice.characteristics || {};
+          const pitch = characteristics.pitch || "medium";
+          const speed = characteristics.speed || "normal";
+          const tone = characteristics.tone || "neutral";
+          const metaLine = `Pitch: ${pitch}, Speed: ${speed}, Tone: ${tone}`;
+
+          const card = document.createElement("div");
+          card.className =
+            "clone-voice-card cursor-pointer bg-surface-container-low rounded-xl p-4 border border-outline-variant/20 hover:border-primary/50 transition-all relative";
+          card.onclick = () => goToVoice(modelId);
+          card.innerHTML = `
+            <button
+              class="absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-container hover:bg-error-container text-on-surface-variant hover:text-error flex items-center justify-center transition-all"
+              title="Delete voice"
+              onclick="event.stopPropagation(); deleteCustomVoice('${modelId}', { silent: true })"
+            >
+              <span class="material-symbols-outlined text-sm">delete</span>
+            </button>
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="font-bold text-sm text-on-surface">${voice.name || "Custom Voice"}</p>
+                <p class="text-xs text-on-surface-variant mt-1">${metaLine}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs font-bold ${voice.qualityScore >= 90 ? 'text-green-600' : voice.qualityScore >= 70 ? 'text-yellow-600' : 'text-orange-600'}">${voice.qualityScore || 0}% accuracy</p>
+                <p class="text-xs text-on-surface-variant mt-1">Use</p>
+              </div>
+            </div>
+          `;
+
+          container.appendChild(card);
+        });
+      }
+
+      async function deleteCustomVoice(modelId, opts = {}) {
+        const silent = !!opts.silent;
+        try {
+          const res = await fetch(`/api/delete-voice-model/${modelId}`, {
+            method: "DELETE",
+          });
+          const data = await res.json().catch(() => ({}));
+
+          if (!res.ok || !data.success) {
+            throw new Error(data.error || data.message || "Delete failed");
+          }
+
+          // Remove from localStorage
+          const userVoices = JSON.parse(
+            localStorage.getItem("userVoices") || "{}",
+          );
+          delete userVoices[modelId];
+          localStorage.setItem("userVoices", JSON.stringify(userVoices));
+
+          // Remove from grids
+          document
+            .querySelectorAll(`.voice-card[data-key="${modelId}"]`)
+            .forEach((el) => el.remove());
+
+          if (selectedVoice === modelId) {
+            selectedVoice = null;
+            document.getElementById("voice-display").textContent =
+              "— Select a voice above —";
+            hideCustomVoiceInfo();
+          }
+
+          loadCloneUserVoices();
+
+          // Hide section if empty
+          if (Object.keys(userVoices).length === 0) {
+            const section = document.getElementById("user-voices-section");
+            if (section) section.style.display = "none";
+          }
+
+          if (!silent) {
+            showStatus("tts", "🗑️ Custom voice deleted.", "success");
+            showStatus("train", "🗑️ Custom voice deleted.", "success");
+          }
+        } catch (e) {
+          if (!silent) {
+            showStatus("tts", `❌ ${e.message}`, "error");
+            showStatus("train", `❌ ${e.message}`, "error");
+          }
+        }
       }
 
       // Load user voices when page loads
       window.addEventListener("DOMContentLoaded", loadUserVoices);
+      window.addEventListener("DOMContentLoaded", loadCloneUserVoices);
+
+      function useTrainedVoiceInTTS() {
+        if (!lastTrainedModelId) {
+          showStatus("tts", "⚠️ Train a voice first.", "warn");
+          return;
+        }
+        goToVoice(lastTrainedModelId);
+      }
 
       // ─── Navigate to TTS with voice preselected ───────────────────────────
       function goToVoice(key) {
